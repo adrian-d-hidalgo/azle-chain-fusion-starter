@@ -1,0 +1,38 @@
+{
+  "name": "azle-chain-fusion-starter",
+  "version": "0.1.0",
+  "license": "MIT",
+  "author": "Bundly",
+  "engines": {
+    "node": ">=21"
+  },
+  "workspaces": [
+    "canisters/*",
+    "packages/*"
+  ],
+  "keywords": [
+    "azle",
+    "dapps",
+    "eth",
+    "ethereum",
+    "express",
+    "icp",
+    "internet computer",
+    "evm",
+    "foundry",
+    "rest",
+    "rest api",
+    "solidity",
+    "typescript"
+  ],
+  "scripts": {
+    "start": "./scripts/start.sh",
+    "preclean": "dfx stop && turbo run clean",
+    "clean": "rm -rf .azle && rm -rf .dfx && rm -rf .turbo && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "prettier": "^3.2.5",
+    "turbo": "^1.13.3"
+  }
+}

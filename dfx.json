@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "dfx": "0.20.1",
+  "canisters": {
+    "azle_app": {
+      "type": "custom",
+      "main": "canisters/azle_app/index.ts",
+      "candid": "canisters/azle_app/index.did",
+      "candid_gen": "automatic",
+      "build": "npx azle azle_app",
+      "wasm": ".azle/azle_app/azle_app.wasm",
+      "gzip": true,
+      "dependencies": ["evm_rpc"],
+      "metadata": [
+        {
+          "name": "candid:service",
+          "path": "canisters/azle_app/index.did"
+        },
+        {
+          "name": "cdk:name",
+          "content": "azle"
+        }
+      ]
+    },
+    "evm_rpc": {
+      "type": "custom",
+      "candid": "https://github.com/internet-computer-protocol/evm-rpc-canister/releases/latest/download/evm_rpc.did",
+      "wasm": "https://github.com/internet-computer-protocol/evm-rpc-canister/releases/latest/download/evm_rpc_dev.wasm.gz",
+      "specified_id": "7hfb6-caaaa-aaaar-qadga-cai",
+      "init_arg": "(record { nodesInSubnet = 28 })",
+      "remote": {
+        "id": {
+          "ic": "7hfb6-caaaa-aaaar-qadga-cai"
+        }
+      }
+    }
+  }
+}
