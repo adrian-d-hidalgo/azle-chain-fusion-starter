@@ -15,7 +15,7 @@ import {
   update,
 } from "azle";
 
-const LogEntry = Record({
+export const LogEntry = Record({
   transactionHash: Opt(text),
   blockNumber: Opt(nat),
   data: text,
@@ -26,6 +26,7 @@ const LogEntry = Record({
   logIndex: Opt(nat),
   removed: bool,
 });
+export type LogEntry = typeof LogEntry.tsType;
 
 const JsonRpcError = Record({
   code: int64,
@@ -79,6 +80,7 @@ const GetLogsResult = Variant({ Ok: Vec(LogEntry), Err: RpcError });
 export const HttpHeader = Record({ value: text, name: text });
 
 export const RpcApi = Record({ url: text, headers: Opt(Vec(HttpHeader)) });
+export type RpcApi = typeof RpcApi.tsType;
 
 const EthSepoliaService = Variant({
   Alchemy: Null,
@@ -124,10 +126,11 @@ export const RpcServices = Variant({
   BaseMainnet: Opt(Vec(L2MainnetService)),
   OptimismMainnet: Opt(Vec(L2MainnetService)),
 });
+export type RpcServices = typeof RpcServices.tsType;
 
 const RpcConfig = Record({ responseSizeEstimate: Opt(nat64) });
 
-const BlockTag = Variant({
+export const BlockTag = Variant({
   Earliest: Null,
   Safe: Null,
   Finalized: Null,
@@ -135,21 +138,56 @@ const BlockTag = Variant({
   Number: nat,
   Pending: Null,
 });
+export type BlockTag = typeof BlockTag.tsType;
 
 const Topic = Vec(text);
 
-const GetLogsArgs = Record({
+export const GetLogsArgs = Record({
   fromBlock: Opt(BlockTag),
   toBlock: Opt(BlockTag),
   addresses: Vec(text),
   topics: Opt(Vec(Topic)),
+});
+export type GetLogsArgs = typeof GetLogsArgs.tsType;
+
+const Block = Record({
+  miner: text,
+  totalDifficulty: nat,
+  receiptsRoot: text,
+  stateRoot: text,
+  hash: text,
+  difficulty: nat,
+  size: nat,
+  uncles: Vec(text),
+  baseFeePerGas: nat,
+  extraData: text,
+  transactionsRoot: Opt(text),
+  sha3Uncles: text,
+  nonce: nat,
+  number: nat,
+  timestamp: nat,
+  transactions: Vec(text),
+  gasLimit: nat,
+  logsBloom: text,
+  parentHash: text,
+  gasUsed: nat,
+  mixHash: text,
+});
+
+const GetBlockByNumberResult = Variant({ Ok: Block, Err: RpcError });
+
+const MultiGetBlockByNumberResult = Variant({
+  Consistent: GetBlockByNumberResult,
+  Inconsistent: Vec(Record({ RpcService, GetBlockByNumberResult })),
 });
 
 export const MultiGetLogsResult = Variant({
   Consistent: GetLogsResult,
   Inconsistent: Vec(Record({ RpcService, GetLogsResult })),
 });
+export type MultiGetLogsResult = typeof MultiGetLogsResult.tsType;
 
 export const EvmRpc = Canister({
+  eth_getBlockByNumber: update([RpcServices, Opt(RpcConfig), BlockTag], MultiGetBlockByNumberResult),
   eth_getLogs: update([RpcServices, Opt(RpcConfig), GetLogsArgs], MultiGetLogsResult),
 })(Principal.fromText("7hfb6-caaaa-aaaar-qadga-cai"));
