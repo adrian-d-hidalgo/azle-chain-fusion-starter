@@ -12,7 +12,7 @@ type Integration = typeof Integration.tsType;
 
 const integrations = StableBTreeMap<nat64, Integration>(20);
 
-export class IntegrationService {
+export class IntegrationsService {
   public async add(data: Integration) {
     const nextId = integrations.len() + 1n;
     await integrations.insert(nextId, data);

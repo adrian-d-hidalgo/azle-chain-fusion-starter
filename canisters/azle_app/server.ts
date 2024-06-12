@@ -1,8 +1,9 @@
-import { None, Some, ic } from "azle";
+import { None, Some } from "azle";
 import express, { Request } from "express";
 
 import { CoprocessorService } from "./coprocessor/coprocessor.service";
-import { IntegrationService } from "./integration/integration.service";
+import { IntegrationsService } from "./integrations/integrations.service";
+import { TimersService } from "./timers/timers.service";
 
 type RpcApi = {
   url: string;
@@ -25,57 +26,13 @@ export const CreateServer = () => {
 
   app.use(express.json());
 
-  const integrationService = new IntegrationService();
+  const integrationService = new IntegrationsService();
   const coprocessorService = new CoprocessorService(integrationService);
+  const timersService = new TimersService(coprocessorService, integrationService);
 
   app.use((_, __, next) => {
-    type TimerGuardStatus = "Ready" | "Running";
-
-    const TimerGuard: { status: TimerGuardStatus } = {
-      status: "Ready",
-    };
-
-    ic.setTimerInterval(3n, async () => {
-      if (TimerGuard.status === "Running") {
-        console.log("Timer is already running");
-        return;
-      }
-
-      TimerGuard.status = "Running";
-
-      const integrations = integrationService.getAll();
-
-      for (const key of integrations.keys()) {
-        await coprocessorService.getLogs(key);
-      }
-
-      await coprocessorService.processPendingLogs();
-
-      TimerGuard.status = "Ready";
-    });
-
+    timersService.init();
     next();
-  });
-
-  app.use((_, __, next) => {
-    type TimerGuardStatus = "Ready" | "Running";
-
-    const TimerGuard: { status: TimerGuardStatus } = {
-      status: "Ready",
-    };
-
-    ic.setTimerInterval(3n, async () => {
-      if (TimerGuard.status === "Running") {
-        console.log("Timer is already running");
-        return;
-      }
-
-      TimerGuard.status = "Running";
-
-      await coprocessorService.processPendingLogs();
-
-      TimerGuard.status = "Ready";
-    });
   });
 
   app.get("/health", (_, res) => {
