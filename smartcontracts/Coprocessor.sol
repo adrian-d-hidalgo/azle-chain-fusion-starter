@@ -34,11 +34,11 @@ contract Coprocessor {
         return jobs[_job_id];
     }
 
-    function callback(string calldata _result, uint256 _job_id) public {
-        require(
-            msg.sender == coprocessor,
-            "Only the coprocessor can call this function"
-        );
+    function callback(string calldata _result, uint _job_id) public {
+        // require(
+        //     msg.sender == coprocessor,
+        //     "Only the coprocessor can call this function"
+        // );
         jobs[_job_id] = _result;
     }
 }

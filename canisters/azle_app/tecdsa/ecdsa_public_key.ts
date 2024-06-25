@@ -1,16 +1,7 @@
-import { None, Null, Record, Variant, ic, text } from "azle";
-import { EcdsaPublicKeyArgs, managementCanister } from "azle/canisters/management";
+import { None, ic } from "azle";
+import { EcdsaPublicKeyArgs, KeyId, managementCanister } from "azle/canisters/management";
 
-const EcdsaKeyId = Record({
-  curve: Variant({
-    secp256k1: Null,
-  }),
-  name: text,
-});
-
-export type EcdsaKeyId = typeof EcdsaKeyId.tsType;
-
-export async function ecdsaPublicKey(keyId: EcdsaKeyId, derivationPath: Uint8Array[]): Promise<Uint8Array> {
+export async function ecdsaPublicKey(keyId: KeyId, derivationPath: Uint8Array[]): Promise<Uint8Array> {
   const args: EcdsaPublicKeyArgs = {
     canister_id: None,
     derivation_path: derivationPath,

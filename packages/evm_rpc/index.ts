@@ -7,8 +7,10 @@ import {
   Variant,
   Vec,
   bool,
+  float64,
   int64,
   nat,
+  nat8,
   nat16,
   nat64,
   text,
@@ -187,7 +189,62 @@ export const MultiGetLogsResult = Variant({
 });
 export type MultiGetLogsResult = typeof MultiGetLogsResult.tsType;
 
+const SendRawTransactionStatus = Variant({
+  Ok: Opt(text),
+  NonceTooLow: Null,
+  NonceTooHigh: Null,
+  InsufficientFunds: Null,
+});
+
+const SendRawTransactionResult = Variant({
+  Ok: SendRawTransactionStatus,
+  Err: RpcError,
+});
+
+const MultiSendRawTransactionResult = Variant({
+  Consistent: SendRawTransactionResult,
+  Inconsistent: Vec(Record({ RpcService, SendRawTransactionResult })),
+});
+
+const GetTransactionCountArgs = Record({ address: text, block: BlockTag });
+
+const GetTransactionCountResult = Variant({ Ok: nat, Err: RpcError });
+
+const MultiGetTransactionCountResult = Variant({
+  Consistent: GetTransactionCountResult,
+  Inconsistent: Vec(Record({ RpcService, GetTransactionCountResult })),
+});
+
+const FeeHistoryArgs = Record({
+  blockCount: nat,
+  newestBlock: BlockTag,
+  rewardPercentiles: Opt(Vec(nat8)),
+});
+
+const FeeHistory = Record({
+  reward: Vec(Vec(nat)),
+  gasUsedRatio: Vec(float64),
+  oldestBlock: nat,
+  baseFeePerGas: Vec(nat),
+});
+
+const FeeHistoryResult = Variant({ Ok: Opt(FeeHistory), Err: RpcError });
+
+const MultiFeeHistoryResult = Variant({
+  Consistent: FeeHistoryResult,
+  Inconsistent: Vec(Record({ RpcService, FeeHistoryResult })),
+});
+
+const RequestResult = Variant({ Ok: text, Err: RpcError });
+
 export const EvmRpc = Canister({
+  eth_feeHistory: update([RpcServices, Opt(RpcConfig), FeeHistoryArgs], MultiFeeHistoryResult),
   eth_getBlockByNumber: update([RpcServices, Opt(RpcConfig), BlockTag], MultiGetBlockByNumberResult),
   eth_getLogs: update([RpcServices, Opt(RpcConfig), GetLogsArgs], MultiGetLogsResult),
+  eth_sendRawTransaction: update([RpcServices, Opt(RpcConfig), text], MultiSendRawTransactionResult),
+  eth_getTransactionCount: update(
+    [RpcServices, Opt(RpcConfig), GetTransactionCountArgs],
+    MultiGetTransactionCountResult
+  ),
+  request: update([RpcService, text, nat64], RequestResult),
 })(Principal.fromText("7hfb6-caaaa-aaaar-qadga-cai"));

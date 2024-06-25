@@ -26,9 +26,10 @@
     "typescript"
   ],
   "scripts": {
-    "start": "./scripts/start.sh",
+    "start": "sh ./scripts/start.sh",
+    "stop": "sh ./scripts/stop.sh",
     "job:create": "cast send 0x5fbdb2315678afecb367f032d93f642f64180aa3  \"newJob()\" --private-key=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --value 0.01ether",
-    "job:get_result": "cast call 0x5fbdb2315678afecb367f032d93f642f64180aa3  \"getResult(uint)(string)\" $npm_config_job_id",
+    "job:result": "cast call 0x5fbdb2315678afecb367f032d93f642f64180aa3  \"getResult(uint)(string)\" $npm_config_job_id",
     "preclean": "dfx stop && turbo run clean",
     "clean": "rm -rf .azle && rm -rf .dfx && rm -rf .turbo && rm -rf node_modules"
   },

@@ -28,7 +28,6 @@ export class TimersService {
 
     return ic.setTimerInterval(timerInterval, async () => {
       if (TimerGuard.status === "Running") {
-        console.log("Timer is already running");
         return;
       }
 
@@ -53,7 +52,6 @@ export class TimersService {
 
     return ic.setTimerInterval(timerInterval, async () => {
       if (TimerGuard.status === "Running") {
-        console.log("Timer is already running");
         return;
       }
 

@@ -1,7 +1,10 @@
 import { None, Null, Record, Some, StableBTreeMap, Variant, ic, nat, nat64 } from "azle";
+import { AbiCoder, getUint, keccak256, toUtf8Bytes } from "ethers";
 
 import { EvmRpc, LogEntry } from "@bundly/ic-evm-rpc";
 
+import { EtherService } from "../ether/ether.service";
+import { fibonacci } from "../helpers";
 import { IntegrationsService } from "../integrations/integrations.service";
 
 const LogToProcess = Record({
@@ -63,8 +66,6 @@ export class CoprocessorService {
           }
         }
 
-        console.log("Logs to process", filteredLogs.length);
-
         if (filteredLogs.length > 0) {
           this.saveLogsToProcess(filteredLogs, integrationId);
           this.integrationsService.update(integrationId, { ...integration, lastScrapedBlock: maxBlock });
@@ -76,18 +77,58 @@ export class CoprocessorService {
   public saveLogsToProcess(logs: LogEntry[], integrationId: nat) {
     logs.forEach((log) => {
       const nextId = logsToProcess.len() + 1n;
-      console.log("Saving logs to process", nextId);
       logsToProcess.insert(nextId, { log, integrationId, status: { Pending: null } });
     });
   }
 
   public async processPendingLogs() {
-    const pendindLogs = logsToProcess.items().filter(([_, value]) => value.status.Pending !== undefined);
+    const pendingLogs = logsToProcess.items().filter(([_, value]) => value.status.Pending !== undefined);
 
-    pendindLogs.forEach(([key, value]) => {
-      // TODO: Implement log processing
-      console.log("Processing log", key);
-      logsToProcess.insert(key, { ...value, status: { Processed: null } });
+    const promises = pendingLogs.map(async ([key, value]) => {
+      const integration = this.integrationsService.get(value.integrationId).Some;
+
+      if (integration === undefined) {
+        throw new Error("Integration not found");
+      }
+
+      const result = fibonacci(20);
+      // Topic 1 is the jobId
+      const jobId = getUint(value.log.topics[1]);
+
+      try {
+        const functionSignature = "callback(string,uint256)";
+        const selector = keccak256(toUtf8Bytes(functionSignature)).slice(0, 10);
+        const abiCoder = new AbiCoder();
+        const args = abiCoder.encode(["string", "uint256"], [result.toString(), jobId]);
+        // slice(2) removes the 0x prefix
+        const data = selector + args.slice(2);
+
+        // TODO: Improve how the nonce is generated
+        const nonce = Number(jobId) + 10;
+
+        const etherService = new EtherService();
+        const chainId = etherService.getChainId(integration.service);
+        const feeEstimates = await etherService.getFeeEstimates(integration.service);
+
+        const transaction = {
+          chainId,
+          to: integration.addresses[0],
+          from: null,
+          gasLimit: getUint(5000000),
+          data,
+          value: getUint(0),
+          nonce,
+          ...feeEstimates,
+        };
+
+        await etherService.sendTransaction(transaction, integration.service);
+
+        logsToProcess.insert(key, { ...value, status: { Processed: null } });
+      } catch (error) {
+        console.log("Error processing log", jobId, error);
+      }
     });
+
+    await Promise.allSettled(promises);
   }
 }

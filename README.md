@@ -13,7 +13,7 @@ No matter what setup you pick from below, run `npm run start` from the project r
 - deploy the chain_fusion canister
 
 If you want to check that the `azle_app` really processed the events, you can either look at the logs output by running `npm run start` – keep an eye open for the `Successfully ran job` message – or you can call the EVM contract to get the results of the jobs.
-To do this, run `npm run job:get_result <job_id>` where `<job_id>` is the id of the job you want to get the result for. This should always return `"6765"` for processed jobs, which is the 20th fibonacci number, and `""` for unprocessed jobs.
+To do this, run `npm run job:result <job_id>` where `<job_id>` is the id of the job you want to get the result for. This should always return `"6765"` for processed jobs, which is the 20th fibonacci number, and `""` for unprocessed jobs.
 
 If you want to create more jobs, simply run `npm run job:create`.
 
