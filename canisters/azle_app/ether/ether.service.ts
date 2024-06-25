@@ -1,138 +1,95 @@
-import { None, ic } from "azle";
-import { TransactionRequest, ethers, getUint } from "ethers";
+import { None, ThresholdKeyInfo, calculateRsvForTEcdsa, ecdsaPublicKey, ic, signWithEcdsa } from "azle";
+import { Transaction, TransactionRequest, ethers } from "ethers";
 
-import { EvmRpc, RpcServices } from "@bundly/ic-evm-rpc";
+import { EvmRpc } from "@bundly/ic-evm-rpc";
+
+import { ConfigService } from "../config/config.service";
+import { EtherRpcService } from "./ether-rpc.service";
+
+class SendRawTransactionInconsistentError extends Error {
+  constructor(message?: string) {
+    super(message);
+    this.name = "SendRawTransactionConsistentError";
+  }
+}
+
+class SendRawTransactionConsistentError extends Error {
+  constructor(message?: string) {
+    super(message);
+    this.name = "SendRawTransactionConsistentError";
+  }
+}
 
 export class EtherService {
-  private wallet: ethers.Wallet;
+  constructor(private service: EtherRpcService) {}
 
-  constructor() {
-    // this.wallet = new ethers.Wallet(process.env.PRIVATE_KEY);
-    this.wallet = new ethers.Wallet("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80");
-  }
-
-  public getChainId(rpcService: RpcServices) {
-    // TODO: Improve chainId handling for another networks
-    return rpcService.Custom ? rpcService.Custom.chainId : 0;
-  }
-
-  public async getNonce(rpcService: RpcServices): Promise<number> {
-    const result = await ic.call(EvmRpc.eth_getTransactionCount, {
-      args: [
-        rpcService,
-        None,
-        {
-          address: this.wallet.address,
-          block: {
-            Latest: null,
-          },
-        },
-      ],
-      cycles: 1_000_000_000n,
+  public signTransaction = async (transaction: TransactionRequest): Promise<string> => {
+    let tx = Transaction.from({
+      chainId: transaction.chainId,
+      to: transaction.to?.toString(),
+      gasLimit: transaction.gasLimit,
+      maxFeePerGas: transaction.maxFeePerGas,
+      maxPriorityFeePerGas: transaction.maxPriorityFeePerGas,
+      data: transaction.data,
+      value: transaction.value,
+      nonce: transaction.nonce,
     });
 
-    if (result.Consistent?.Ok) {
-      return Number(result.Consistent.Ok);
-    }
+    const unsignedSerializedTx = tx.unsignedSerialized;
+    const unsignedSerializedTxHash = ethers.keccak256(unsignedSerializedTx);
 
-    throw new Error("Error getting transaction nounce");
-  }
+    const configService = new ConfigService();
 
-  private async getMaxPriorityFeePerGas(rpcService: RpcServices): Promise<bigint> {
-    const body = {
-      jsonrpc: "2.0",
-      method: "eth_maxPriorityFeePerGas",
-      params: [],
-      id: 1,
+    const thresholdKeyInfo: ThresholdKeyInfo = {
+      derivationPath: [],
+      keyId: configService.getKeyId(),
     };
 
-    if (!rpcService.Custom?.services[0]) {
-      throw new Error("Service not found");
-    }
+    const signedSerializedTxHash = await signWithEcdsa(
+      thresholdKeyInfo,
+      ethers.getBytes(unsignedSerializedTxHash)
+    );
 
-    // TODO: Add support for another services
-    const service = {
-      Custom: {
-        url: rpcService.Custom?.services[0].url,
-        headers: rpcService.Custom?.services[0].headers,
-      },
+    const pubkey = await ecdsaPublicKey(thresholdKeyInfo);
+    const evmAddress = ethers.computeAddress(ethers.hexlify(pubkey));
+
+    const { r, s, v } = calculateRsvForTEcdsa(
+      Number(this.service.getChainId()),
+      evmAddress,
+      unsignedSerializedTxHash,
+      signedSerializedTxHash
+    );
+
+    tx.signature = {
+      r,
+      s,
+      v,
     };
 
-    const result = await ic.call(EvmRpc.request, {
-      args: [service, JSON.stringify(body), 1_000n],
-      cycles: 1_000_000_000n,
-    });
-
-    if (result.Ok) {
-      return BigInt(JSON.parse(result.Ok).result);
-    }
-
-    throw new Error("Error getting max priority fee per gas");
-  }
-
-  private async getFeeHistory(rpcService: RpcServices) {
-    const jsonRpcArgs = {
-      blockCount: 1n,
-      newestBlock: {
-        Latest: null,
-      },
-      rewardPercentiles: None,
-    };
-
-    const result = await ic.call(EvmRpc.eth_feeHistory, {
-      args: [rpcService, None, jsonRpcArgs],
-      cycles: 1_000_000_000n,
-    });
-
-    if (result.Consistent?.Ok?.Some) {
-      return result.Consistent.Ok.Some;
-    }
-
-    throw new Error("Error getting fee history");
-  }
-
-  public async getFeeEstimates(rpcService: RpcServices) {
-    try {
-      const maxPriorityFeePerGas = await this.getMaxPriorityFeePerGas(rpcService);
-      const feeHistory = await this.getFeeHistory(rpcService);
-      const baseFeePerGas = feeHistory.baseFeePerGas[0];
-      const maxFeePerGas = baseFeePerGas * 2n + maxPriorityFeePerGas;
-
-      return {
-        maxFeePerGas,
-        maxPriorityFeePerGas,
-      };
-    } catch (error) {
-      console.error("Error getting fee estimates", error);
-      throw new Error("Error getting fee estimates");
-    }
-  }
-
-  private signTransaction = async (transaction: TransactionRequest): Promise<string> => {
-    try {
-      return await this.wallet.signTransaction(transaction);
-    } catch (error) {
-      console.error("Error signing transaction", error);
-      throw new Error("Error signing transaction");
-    }
+    return tx.serialized;
   };
 
-  public async sendTransaction(transaction: TransactionRequest, rpcService: RpcServices) {
+  public async sendRawTransaction(transaction: string) {
     try {
-      const tx = await this.signTransaction(transaction);
-
       const result = await ic.call(EvmRpc.eth_sendRawTransaction, {
-        args: [rpcService, None, tx],
+        args: [this.service.getValue(), None, transaction],
         cycles: 1_000_000_000n,
       });
 
-      if (result.Consistent?.Ok?.Ok) {
-        return result.Consistent?.Ok?.Ok;
+      if (result.Inconsistent) {
+        throw new SendRawTransactionInconsistentError();
+      }
+
+      if (result.Consistent?.Err) {
+        throw new SendRawTransactionConsistentError();
+      }
+
+      if (result.Consistent?.Ok.Ok) {
+        return result.Consistent?.Ok.Ok;
       }
 
       throw new Error("Inconsistent or no Ok result from send transaction");
     } catch (error) {
-      console.error("Error sending transaction", error);
       throw new Error("Error sending transaction");
     }
   }

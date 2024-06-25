@@ -1,17 +1,17 @@
-import { ic, init, nat64 } from "azle";
+import { ic, nat64 } from "azle";
 
-import { CoprocessorService } from "../coprocessor/coprocessor.service";
-import { IntegrationsService } from "../integrations/integrations.service";
+import { ConnectionService } from "../connection/connection.service";
+import { LogManager } from "../log/log-manager";
 
 type TimerGuardStatus = "Ready" | "Running";
 
-export class TimersService {
+export class TimerService {
   private getLogsTimer?: nat64;
   private processPendingLogsTimer?: nat64;
 
   constructor(
-    private coprocessorService: CoprocessorService,
-    private integrationsService: IntegrationsService
+    private logManager: LogManager,
+    private connectionService: ConnectionService
   ) {}
 
   public init() {
@@ -33,10 +33,10 @@ export class TimersService {
 
       TimerGuard.status = "Running";
 
-      const integrations = this.integrationsService.getAll();
+      const integrations = this.connectionService.getAll();
 
       for (const key of integrations.keys()) {
-        await this.coprocessorService.getLogs(key);
+        await this.logManager.getLogs(key);
       }
 
       TimerGuard.status = "Ready";
@@ -57,7 +57,7 @@ export class TimersService {
 
       TimerGuard.status = "Running";
 
-      await this.coprocessorService.processPendingLogs();
+      await this.logManager.processLogs();
 
       TimerGuard.status = "Ready";
     });

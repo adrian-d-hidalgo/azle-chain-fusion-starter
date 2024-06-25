@@ -1,9 +1,9 @@
 import { None, Some } from "azle";
 import express, { Request } from "express";
 
-import { CoprocessorService } from "./coprocessor/coprocessor.service";
-import { IntegrationsService } from "./integrations/integrations.service";
-import { TimersService } from "./timers/timers.service";
+import { ConnectionService } from "./connection/connection.service";
+import { LogManager } from "./log/log-manager";
+import { TimerService } from "./timers/timer.service";
 
 type RpcApi = {
   url: string;
@@ -26,12 +26,12 @@ export const CreateServer = () => {
 
   app.use(express.json());
 
-  const integrationService = new IntegrationsService();
-  const coprocessorService = new CoprocessorService(integrationService);
-  const timersService = new TimersService(coprocessorService, integrationService);
+  const connectionService = new ConnectionService();
+  const logManager = new LogManager(connectionService);
+  const timerService = new TimerService(logManager, connectionService);
 
   app.use((_, __, next) => {
-    timersService.init();
+    timerService.init();
     next();
   });
 
@@ -39,7 +39,7 @@ export const CreateServer = () => {
     res.send("ok");
   });
 
-  app.post("/integrations/custom", async (req: Request<any, any, RegisterCustomRpcIntegration>, res) => {
+  app.post("/connections/custom", async (req: Request<any, any, RegisterCustomRpcIntegration>, res) => {
     const { connection, events } = req.body;
 
     const chainId = BigInt(connection.chainId);
@@ -60,7 +60,7 @@ export const CreateServer = () => {
       lastScrapedBlock: 0n,
     };
 
-    await integrationService.add(data);
+    await connectionService.add(data);
 
     res.send();
   });

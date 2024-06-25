@@ -116,6 +116,7 @@ export const RpcService = Variant({
   BaseMainnet: L2MainnetService,
   OptimismMainnet: L2MainnetService,
 });
+export type RpcService = typeof RpcService.tsType;
 
 export const RpcServices = Variant({
   Custom: Record({

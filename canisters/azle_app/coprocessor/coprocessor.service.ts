@@ -1,134 +1,82 @@
-import { None, Null, Record, Some, StableBTreeMap, Variant, ic, nat, nat64 } from "azle";
+import { None, Some, ic } from "azle";
 import { AbiCoder, getUint, keccak256, toUtf8Bytes } from "ethers";
 
-import { EvmRpc, LogEntry } from "@bundly/ic-evm-rpc";
+import { EvmRpc } from "@bundly/ic-evm-rpc";
 
+import { EtherFeeCalculator } from "../ether/ether-fee-calculator";
+import { EtherRpcService } from "../ether/ether-rpc.service";
 import { EtherService } from "../ether/ether.service";
-import { fibonacci } from "../helpers";
-import { IntegrationsService } from "../integrations/integrations.service";
 
-const LogToProcess = Record({
-  log: LogEntry,
-  integrationId: nat,
-  status: Variant({ Pending: Null, Processed: Null }),
-});
-type LogToProcess = typeof LogToProcess.tsType;
-
-const logsToProcess = StableBTreeMap<nat, LogToProcess>(10);
+export type GetLogsOptions = {
+  fromBlock: bigint;
+  toBlock: bigint;
+  addresses: string[];
+  topics: string[][];
+};
 
 export class CoprocessorService {
-  private MAX_BLOCK_SPREAD: nat64 = 500n;
+  public static MAX_BLOCK_SPREAD: bigint = 500n;
 
-  constructor(private integrationsService: IntegrationsService) {}
+  constructor(
+    private service: EtherRpcService,
+    private addresses: string[]
+  ) {}
 
-  public async getLogs(integrationId: nat64) {
-    const integration = this.integrationsService.get(integrationId).Some;
-
-    if (integration === undefined) {
-      throw new Error("Integration not found");
+  public async getLogs(options: GetLogsOptions) {
+    if (options.fromBlock < 0 || options.toBlock < 0) {
+      throw new Error("Block numbers must be positive");
     }
 
-    const toBlock = integration.lastScrapedBlock + this.MAX_BLOCK_SPREAD;
+    if (options.toBlock < options.fromBlock) {
+      throw new Error("To block must be greater than from block");
+    }
+
+    if (options.toBlock - options.fromBlock > CoprocessorService.MAX_BLOCK_SPREAD) {
+      throw new Error("Block spread too large");
+    }
 
     const getLogsArgs = {
-      fromBlock: Some({ Number: integration.lastScrapedBlock }),
-      toBlock: Some({ Number: toBlock }),
-      addresses: integration.addresses,
-      topics: integration.topics,
+      fromBlock: Some({ Number: options.fromBlock }),
+      toBlock: Some({ Number: options.toBlock }),
+      addresses: options.addresses,
+      topics: Some(options.topics),
     };
 
-    const getLogsResponse = await ic.call(EvmRpc.eth_getLogs, {
-      args: [integration.service, None, getLogsArgs],
+    return ic.call(EvmRpc.eth_getLogs, {
+      args: [this.service.getValue(), None, getLogsArgs],
       cycles: 1_000_000_000n,
     });
-
-    if (getLogsResponse.Consistent?.Ok) {
-      const logs = getLogsResponse.Consistent.Ok;
-
-      const filteredLogs = logs.filter((log) => {
-        const blockNumber = log.blockNumber.Some;
-
-        if (blockNumber !== undefined) {
-          return log.blockNumber.Some !== integration.lastScrapedBlock;
-        }
-
-        // TODO: What happens if blockNumber is not present?
-        return true;
-      });
-
-      if (filteredLogs.length > 0) {
-        let maxBlock = integration.lastScrapedBlock;
-
-        for (const log of filteredLogs) {
-          const currentBlockNumber = log.blockNumber.Some;
-          if (currentBlockNumber && currentBlockNumber > maxBlock) {
-            maxBlock = currentBlockNumber;
-          }
-        }
-
-        if (filteredLogs.length > 0) {
-          this.saveLogsToProcess(filteredLogs, integrationId);
-          this.integrationsService.update(integrationId, { ...integration, lastScrapedBlock: maxBlock });
-        }
-      }
-    }
   }
 
-  public saveLogsToProcess(logs: LogEntry[], integrationId: nat) {
-    logs.forEach((log) => {
-      const nextId = logsToProcess.len() + 1n;
-      logsToProcess.insert(nextId, { log, integrationId, status: { Pending: null } });
-    });
-  }
+  public async callback(result: string, jobId: bigint) {
+    const functionSignature = "callback(string,uint)";
+    const selector = keccak256(toUtf8Bytes(functionSignature)).slice(0, 10);
+    const abiCoder = new AbiCoder();
+    const args = abiCoder.encode(["string", "uint"], [result.toString(), jobId]);
+    // slice(2) removes the 0x prefix
+    const data = selector + args.slice(2);
 
-  public async processPendingLogs() {
-    const pendingLogs = logsToProcess.items().filter(([_, value]) => value.status.Pending !== undefined);
+    // TODO: Improve nonce generation
+    const nonce = Number(jobId) + 10;
+    const chainId = this.service.getChainId();
+    const feeCalculator = new EtherFeeCalculator(this.service);
+    const feeEstimates = await feeCalculator.getFeeEstimates();
+    const contractAddress = this.addresses[0];
 
-    const promises = pendingLogs.map(async ([key, value]) => {
-      const integration = this.integrationsService.get(value.integrationId).Some;
+    const transaction = {
+      chainId,
+      to: contractAddress,
+      gasLimit: getUint(5000000),
+      maxFeePerGas: feeEstimates.maxFeePerGas,
+      maxPriorityFeePerGas: feeEstimates.maxPriorityFeePerGas,
+      data,
+      value: getUint(0),
+      nonce,
+    };
 
-      if (integration === undefined) {
-        throw new Error("Integration not found");
-      }
+    const etherService = new EtherService(this.service);
+    const rawTransaction = await etherService.signTransaction(transaction);
 
-      const result = fibonacci(20);
-      // Topic 1 is the jobId
-      const jobId = getUint(value.log.topics[1]);
-
-      try {
-        const functionSignature = "callback(string,uint256)";
-        const selector = keccak256(toUtf8Bytes(functionSignature)).slice(0, 10);
-        const abiCoder = new AbiCoder();
-        const args = abiCoder.encode(["string", "uint256"], [result.toString(), jobId]);
-        // slice(2) removes the 0x prefix
-        const data = selector + args.slice(2);
-
-        // TODO: Improve how the nonce is generated
-        const nonce = Number(jobId) + 10;
-
-        const etherService = new EtherService();
-        const chainId = etherService.getChainId(integration.service);
-        const feeEstimates = await etherService.getFeeEstimates(integration.service);
-
-        const transaction = {
-          chainId,
-          to: integration.addresses[0],
-          from: null,
-          gasLimit: getUint(5000000),
-          data,
-          value: getUint(0),
-          nonce,
-          ...feeEstimates,
-        };
-
-        await etherService.sendTransaction(transaction, integration.service);
-
-        logsToProcess.insert(key, { ...value, status: { Processed: null } });
-      } catch (error) {
-        console.log("Error processing log", jobId, error);
-      }
-    });
-
-    await Promise.allSettled(promises);
+    return etherService.sendRawTransaction(rawTransaction);
   }
 }

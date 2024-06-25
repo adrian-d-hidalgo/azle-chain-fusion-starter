@@ -10,7 +10,32 @@ No matter what setup you pick from below, run `npm run start` from the project r
 - start dfx
 - deploy the EVM contract
 - generate a number of jobs
-- deploy the chain_fusion canister
+- deploy the chain_fusion
+
+### Set an Event listener
+
+**Endpoint**
+
+POST /connections/custom
+
+**Body**
+
+```json
+{
+  "connection": {
+    "chainId": 31337,
+    "services": [
+      {
+        "url": "https://localhost:8546"
+      }
+    ]
+  },
+  "events": {
+    "topics": [["0x031ada964b8e520743eb9508d0ace62654b126430b7e5a92b42e78eebb61602e"]],
+    "addresses": ["0x5FbDB2315678afecb367f032d93F642f64180aa3"]
+  }
+}
+```
 
 If you want to check that the `azle_app` really processed the events, you can either look at the logs output by running `npm run start` – keep an eye open for the `Successfully ran job` message – or you can call the EVM contract to get the results of the jobs.
 To do this, run `npm run job:result <job_id>` where `<job_id>` is the id of the job you want to get the result for. This should always return `"6765"` for processed jobs, which is the 20th fibonacci number, and `""` for unprocessed jobs.
