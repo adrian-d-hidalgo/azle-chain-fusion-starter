@@ -52,7 +52,7 @@ export class CoprocessorService {
     const functionSignature = "callback(string,uint)";
     const selector = keccak256(toUtf8Bytes(functionSignature)).slice(0, 10);
     const abiCoder = new AbiCoder();
-    const args = abiCoder.encode(["string", "uint"], [result.toString(), jobId]);
+    const args = abiCoder.encode(["string", "uint"], [result, jobId]);
     // slice(2) removes the 0x prefix
     const data = selector + args.slice(2);
 
@@ -74,9 +74,15 @@ export class CoprocessorService {
       nonce,
     };
 
-    const etherService = new EtherService(this.service);
-    const rawTransaction = await etherService.signTransaction(transaction);
+    try {
+      const etherService = new EtherService(this.service);
+      const rawTransaction = await etherService.signTransaction(transaction);
+      const sendRawTxResult = await etherService.sendRawTransaction(rawTransaction);
 
-    return etherService.sendRawTransaction(rawTransaction);
+      return sendRawTxResult;
+    } catch (err) {
+      console.error("Error sending raw transaction", err);
+      throw err;
+    }
   }
 }

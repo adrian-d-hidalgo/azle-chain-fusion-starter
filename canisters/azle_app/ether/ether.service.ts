@@ -6,6 +6,18 @@ import { EvmRpc } from "@bundly/ic-evm-rpc";
 import { ConfigService } from "../config/config.service";
 import { EtherRpcService } from "./ether-rpc.service";
 
+type SignRequest = {
+  chainId?: bigint;
+  from?: string;
+  to?: string;
+  gasLimit: bigint;
+  maxFeePerGas?: bigint;
+  maxPriorityFeePerGas?: bigint;
+  value?: bigint;
+  nonce?: number;
+  data?: string;
+};
+
 class SendRawTransactionInconsistentError extends Error {
   constructor(message?: string) {
     super(message);
@@ -23,10 +35,11 @@ class SendRawTransactionConsistentError extends Error {
 export class EtherService {
   constructor(private service: EtherRpcService) {}
 
-  public signTransaction = async (transaction: TransactionRequest): Promise<string> => {
+  public signTransaction = async (transaction: SignRequest): Promise<string> => {
     let tx = Transaction.from({
       chainId: transaction.chainId,
-      to: transaction.to?.toString(),
+      from: transaction.from,
+      to: transaction.to,
       gasLimit: transaction.gasLimit,
       maxFeePerGas: transaction.maxFeePerGas,
       maxPriorityFeePerGas: transaction.maxPriorityFeePerGas,
