@@ -33,6 +33,7 @@ export class EtherService {
       data: transaction.data,
       value: transaction.value,
       nonce: transaction.nonce,
+      type: 2,
     });
 
     const unsignedSerializedTx = tx.unsignedSerialized;
@@ -85,7 +86,7 @@ export class EtherService {
       }
 
       if (result.Consistent?.Ok.Ok) {
-        return result.Consistent?.Ok.Ok;
+        return result;
       }
 
       throw new Error("Inconsistent or no Ok result from send transaction");
