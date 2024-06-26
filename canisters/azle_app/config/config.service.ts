@@ -30,7 +30,7 @@ const AppConfig = Record({
 type AppConfig = typeof AppConfig.tsType;
 
 export type InitOptions = {
-  keyId: EcdsaKeyId;
+  ecdsaKeyId: EcdsaKeyId;
 };
 
 export class ConfigService {
@@ -56,11 +56,11 @@ export class ConfigService {
   }
 
   public async init(options: InitOptions) {
-    await this.setKeyId(options.keyId.name, options.keyId.curve);
+    this.setEcdsaKeyId(options.ecdsaKeyId.name, options.ecdsaKeyId.curve);
     await this.setEvmAddress(this.getKeyId());
   }
 
-  private async setKeyId(name: "dfx_test_key" | "test_key_1" | "key_1", curve: "secp256k1"): Promise<void> {
+  private setEcdsaKeyId(name: "dfx_test_key" | "test_key_1" | "key_1", curve: "secp256k1"): void {
     const ecdsaKeyId = {
       name,
       curve,
