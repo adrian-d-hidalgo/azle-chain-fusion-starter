@@ -50,10 +50,10 @@ export class CoprocessorService {
   }
 
   public async callback(result: string, jobId: bigint) {
-    const functionSignature = "callback(string,uint)";
+    const functionSignature = "callback(string,uint256)";
     const selector = keccak256(toUtf8Bytes(functionSignature)).slice(0, 10);
     const abiCoder = new AbiCoder();
-    const args = abiCoder.encode(["string", "uint"], [result, jobId]);
+    const args = abiCoder.encode(["string", "uint256"], [result, jobId]);
     // slice(2) removes the 0x prefix
     const data = selector + args.slice(2);
 
