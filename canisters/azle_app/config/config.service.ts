@@ -12,9 +12,12 @@ import {
 } from "azle";
 import { computeAddress, hexlify } from "ethers";
 
+export type EcdsaKeyIdName = "dfx_test_key" | "test_key_1" | "key_1";
+export type EcdsaKeyIdCurve = "secp256k1";
+
 export type EcdsaKeyId = {
-  curve: "secp256k1";
-  name: "dfx_test_key" | "test_key_1" | "key_1";
+  curve: EcdsaKeyIdCurve;
+  name: EcdsaKeyIdName;
 };
 
 const AppConfig = Record({
@@ -60,7 +63,7 @@ export class ConfigService {
     await this.setEvmAddress(this.getKeyId());
   }
 
-  private setEcdsaKeyId(name: "dfx_test_key" | "test_key_1" | "key_1", curve: "secp256k1"): void {
+  private setEcdsaKeyId(name: EcdsaKeyIdName, curve: EcdsaKeyIdCurve): void {
     const ecdsaKeyId = {
       name,
       curve,

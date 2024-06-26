@@ -1,6 +1,5 @@
 import { Record, Server, ic, init, query, setNodeServer, text } from "azle";
 import { KeyId } from "azle/canisters/management";
-import e from "express";
 
 import { ConfigService, EcdsaKeyId } from "./config/config.service";
 import { CreateServer } from "./server";
@@ -13,7 +12,9 @@ export default Server(CreateServer, {
   init: init([InitOptions], (options) => {
     const { ecdsa_key_id } = options;
 
-    if (!["dfx_test_key", "test_key_1", "key_1"].includes(ecdsa_key_id.name)) {
+    const keyIdNames = ["dfx_test_key", "test_key_1", "key_1"];
+
+    if (!keyIdNames.includes(ecdsa_key_id.name)) {
       throw new Error("Invalid key name");
     }
 
