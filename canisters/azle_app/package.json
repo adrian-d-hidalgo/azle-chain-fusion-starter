@@ -5,7 +5,7 @@
   },
   "dependencies": {
     "azle": "^0.21.1",
-    "ethers": "^6.13.0",
+    "ethers": "^6.13.1",
     "express": "^4.19.2"
   },
   "devDependencies": {
