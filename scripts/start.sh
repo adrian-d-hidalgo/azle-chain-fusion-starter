@@ -32,7 +32,7 @@ fi
 dfx start --clean --background
 dfx ledger fabricate-cycles --icp 10000 --canister $(dfx identity get-wallet)
 dfx deploy evm_rpc
-dfx deploy --with-cycles 10_000_000_000_000 azle_app --argument='(
+dfx deploy --with-cycles 10_000_000_000_000 coprocessor_canister --argument='(
   record {
     ecdsa_key_id = record {
       name = "dfx_test_key";
@@ -43,7 +43,7 @@ dfx deploy --with-cycles 10_000_000_000_000 azle_app --argument='(
 # sleep for 3 seconds to allow the evm address to be generated
 sleep 3
 # safe the chain_fusion canisters evm address
-export EVM_ADDRESS=$(dfx canister call azle_app get_evm_address | awk -F'"' '{print $2}')
+export EVM_ADDRESS=$(dfx canister call coprocessor_canister get_evm_address | awk -F'"' '{print $2}')
 echo "EVM_ADDRESS=$EVM_ADDRESS"
 # deploy the contract passing the chain_fusion canisters evm address to receive the fees and create a couple of new jobs
 forge script ./scripts/Coprocessor.s.sol:MyScript --fork-url http://localhost:8545 --broadcast --sig "run(address)" $EVM_ADDRESS

@@ -1,5 +1,5 @@
 {
-  "name": "azle-app",
+  "name": "coprocessor_canister",
   "scripts": {
     "clean": "rm -rf .turbo && rm -rf node_modules"
   },
