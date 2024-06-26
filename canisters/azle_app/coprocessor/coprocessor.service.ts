@@ -3,6 +3,7 @@ import { AbiCoder, getUint, keccak256, toUtf8Bytes } from "ethers";
 
 import { EvmRpc } from "@bundly/ic-evm-rpc";
 
+import { ConfigService } from "../config/config.service";
 import { EtherFeeCalculator } from "../ether/ether-fee-calculator";
 import { EtherRpcService } from "../ether/ether-rpc.service";
 import { EtherService } from "../ether/ether.service";
@@ -57,7 +58,8 @@ export class CoprocessorService {
     const data = selector + args.slice(2);
 
     // TODO: Improve nonce generation
-    const nonce = Number(jobId) + 10;
+    const configService = new ConfigService();
+    const nonce = Number(configService.getNonce());
     const chainId = this.service.getChainId();
     const feeCalculator = new EtherFeeCalculator(this.service);
     const feeEstimates = await feeCalculator.getFeeEstimates();
@@ -78,6 +80,12 @@ export class CoprocessorService {
       const etherService = new EtherService(this.service);
       const rawTransaction = await etherService.signTransaction(transaction);
       const sendRawTxResult = await etherService.sendRawTransaction(rawTransaction);
+
+      console.log("Transaction sent: ", sendRawTxResult);
+
+      if (sendRawTxResult.Consistent.Ok?.Ok !== undefined) {
+        configService.incrementNonce();
+      }
 
       return sendRawTxResult;
     } catch (err) {

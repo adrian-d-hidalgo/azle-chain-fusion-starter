@@ -1,4 +1,15 @@
-import { None, Opt, Record, Some, StableBTreeMap, ThresholdKeyInfo, ecdsaPublicKey, nat8, text } from "azle";
+import {
+  None,
+  Opt,
+  Record,
+  Some,
+  StableBTreeMap,
+  ThresholdKeyInfo,
+  ecdsaPublicKey,
+  nat,
+  nat8,
+  text,
+} from "azle";
 import { computeAddress, hexlify } from "ethers";
 
 export type EcdsaKeyId = {
@@ -14,6 +25,7 @@ const AppConfig = Record({
     })
   ),
   evmAddress: Opt(text),
+  nonce: nat,
 });
 type AppConfig = typeof AppConfig.tsType;
 
@@ -32,6 +44,7 @@ export class ConfigService {
       const newConfig = {
         ecdsaKeyId: None,
         evmAddress: None,
+        nonce: 0n,
       };
 
       this.configStore.insert(0, newConfig);
@@ -104,5 +117,18 @@ export class ConfigService {
     }
 
     return address;
+  }
+
+  public getNonce(): nat {
+    return this.config.nonce;
+  }
+
+  public incrementNonce(): void {
+    this.config = {
+      ...this.config,
+      nonce: this.config.nonce + 1n,
+    };
+
+    this.configStore.insert(0, this.config);
   }
 }
