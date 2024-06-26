@@ -63,6 +63,7 @@ export class CoprocessorService {
     const chainId = this.service.getChainId();
     const feeCalculator = new EtherFeeCalculator(this.service);
     const feeEstimates = await feeCalculator.getFeeEstimates();
+    // TODO: Should iterate over all addresses?
     const contractAddress = this.addresses[0];
 
     const transaction = {
