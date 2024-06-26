@@ -82,7 +82,7 @@ export class LogManager {
   public async processLogs() {
     const pendingLogs = logsToProcess.items().filter(([_, value]) => value.status.Pending !== undefined);
 
-    const promises = pendingLogs.map(async ([key, value]) => {
+    for (const [key, value] of pendingLogs) {
       const connection = this.connectionService.get(value.contractId).Some;
 
       if (connection === undefined) {
@@ -102,8 +102,6 @@ export class LogManager {
         console.error("Error processing log", error);
         throw new Error("Error processing log");
       }
-    });
-
-    await Promise.allSettled(promises);
+    }
   }
 }
