@@ -1,18 +1,15 @@
 import { ic, nat64 } from "azle";
 
-import { ConnectionService } from "../connection/connection.service";
 import { LogManager } from "../log/log-manager";
 
 type TimerGuardStatus = "Ready" | "Running";
+type TimerGuard = { status: TimerGuardStatus };
 
 export class TimerService {
   private getLogsTimer?: nat64;
   private processPendingLogsTimer?: nat64;
 
-  constructor(
-    private logManager: LogManager,
-    private connectionService: ConnectionService
-  ) {}
+  constructor(private logManager: LogManager) {}
 
   public init() {
     this.getLogsTimer = this.initGetLogsTimer();
@@ -20,46 +17,43 @@ export class TimerService {
   }
 
   private initGetLogsTimer() {
-    const TimerGuard: { status: TimerGuardStatus } = {
+    const timerGuard: TimerGuard = {
       status: "Ready",
     };
 
     const timerInterval = 3n;
 
     return ic.setTimerInterval(timerInterval, async () => {
-      if (TimerGuard.status === "Running") {
+      // Prevent multiple instances of the timer from running at the same time
+      if (timerGuard.status === "Running") {
         return;
       }
 
-      TimerGuard.status = "Running";
+      timerGuard.status = "Running";
 
-      const integrations = this.connectionService.getAll();
+      await this.logManager.getLogs();
 
-      for (const key of integrations.keys()) {
-        await this.logManager.getLogs(key);
-      }
-
-      TimerGuard.status = "Ready";
+      timerGuard.status = "Ready";
     });
   }
 
   private initProcessPendingLogsTimer() {
-    const TimerGuard: { status: TimerGuardStatus } = {
+    const timerGuard: TimerGuard = {
       status: "Ready",
     };
 
     const timerInterval = 3n;
 
     return ic.setTimerInterval(timerInterval, async () => {
-      if (TimerGuard.status === "Running") {
+      if (timerGuard.status === "Running") {
         return;
       }
 
-      TimerGuard.status = "Running";
+      timerGuard.status = "Running";
 
       await this.logManager.processLogs();
 
-      TimerGuard.status = "Ready";
+      timerGuard.status = "Ready";
     });
   }
 

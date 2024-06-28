@@ -1,7 +1,7 @@
 import { None, Some } from "azle";
 import express, { Request } from "express";
 
-import { ConnectionService } from "./connection/connection.service";
+import { EventService } from "./event/event.service";
 import { LogManager } from "./log/log-manager";
 import { TimerService } from "./timers/timer.service";
 
@@ -11,7 +11,8 @@ type RpcApi = {
 };
 
 type RegisterCustomRpcIntegration = {
-  connection: {
+  service: {
+    type: string;
     chainId: number;
     services: RpcApi[];
   };
@@ -26,9 +27,9 @@ export const CreateServer = () => {
 
   app.use(express.json());
 
-  const connectionService = new ConnectionService();
-  const logManager = new LogManager(connectionService);
-  const timerService = new TimerService(logManager, connectionService);
+  const eventService = new EventService();
+  const logManager = new LogManager(eventService);
+  const timerService = new TimerService(logManager);
 
   app.use((_, __, next) => {
     timerService.init();
@@ -39,18 +40,23 @@ export const CreateServer = () => {
     res.send("ok");
   });
 
-  app.post("/connections/custom", async (req: Request<any, any, RegisterCustomRpcIntegration>, res) => {
-    const { connection, events } = req.body;
+  app.post("/events", async (req: Request<any, any, RegisterCustomRpcIntegration>, res) => {
+    const { service, events } = req.body;
 
-    const chainId = BigInt(connection.chainId);
-    const services = connection.services.map((service) => {
-      const headers = service.headers
-        ? service.headers.map((header) => {
+    if (service.type !== "custom") {
+      res.status(400).send("Invalid service type");
+      return;
+    }
+
+    const chainId = BigInt(service.chainId);
+    const services = service.services.map((s) => {
+      const headers = s.headers
+        ? s.headers.map((header) => {
             return { name: header.name, value: header.value };
           })
         : undefined;
 
-      return { url: service.url, headers: headers ? Some(headers) : None };
+      return { url: s.url, headers: headers ? Some(headers) : None };
     });
 
     const data = {
@@ -60,7 +66,7 @@ export const CreateServer = () => {
       lastScrapedBlock: 0n,
     };
 
-    await connectionService.add(data);
+    await eventService.add(data);
 
     res.send();
   });

@@ -6,7 +6,7 @@ import { EvmRpc } from "@bundly/ic-evm-rpc";
 import { ConfigService } from "../config/config.service";
 import { EtherFeeCalculator } from "../ether/ether-fee-calculator";
 import { EtherRpcService } from "../ether/ether-rpc.service";
-import { EtherService } from "../ether/ether.service";
+import { EtherService, SignRequest } from "../ether/ether.service";
 
 export type GetLogsOptions = {
   fromBlock: bigint;
@@ -49,7 +49,7 @@ export class CoprocessorService {
     });
   }
 
-  public async callback(result: string, jobId: bigint) {
+  public async callback(result: string, jobId: bigint): Promise<string> {
     const functionSignature = "callback(string,uint256)";
     const selector = keccak256(toUtf8Bytes(functionSignature)).slice(0, 10);
     const abiCoder = new AbiCoder();
@@ -66,7 +66,7 @@ export class CoprocessorService {
     // TODO: Should iterate over all addresses?
     const contractAddress = this.addresses[0];
 
-    const transaction = {
+    const transaction: SignRequest = {
       chainId,
       to: contractAddress,
       gasLimit: getUint(5000000),
@@ -82,15 +82,18 @@ export class CoprocessorService {
       const rawTransaction = await etherService.signTransaction(transaction);
       const sendRawTxResult = await etherService.sendRawTransaction(rawTransaction);
 
-      console.log("Transaction sent: ", sendRawTxResult);
-
-      if (sendRawTxResult.Consistent.Ok?.Ok !== undefined) {
-        configService.incrementNonce();
+      if (sendRawTxResult.Consistent.Ok?.Ok === undefined) {
+        throw sendRawTxResult.Consistent.Err;
       }
 
-      return sendRawTxResult;
+      if (sendRawTxResult.Consistent.Err) {
+        throw sendRawTxResult.Consistent.Err;
+      }
+
+      configService.incrementNonce();
+
+      return sendRawTxResult.Consistent.Ok.Ok.Some || "";
     } catch (err) {
-      console.error("Error sending raw transaction", err);
       throw err;
     }
   }

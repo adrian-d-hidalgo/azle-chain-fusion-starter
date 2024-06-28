@@ -6,7 +6,7 @@ import { EvmRpc } from "@bundly/ic-evm-rpc";
 import { ConfigService } from "../config/config.service";
 import { EtherRpcService } from "./ether-rpc.service";
 
-type SignRequest = {
+export type SignRequest = {
   chainId?: bigint;
   from?: string;
   to?: string;
