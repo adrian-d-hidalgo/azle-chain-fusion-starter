@@ -1,6 +1,6 @@
 import { ic, nat64 } from "azle";
 
-import { LogManager } from "../log/log-manager";
+import { LogService } from "./log-service";
 
 type TimerGuardStatus = "Ready" | "Running";
 type TimerGuard = { status: TimerGuardStatus };
@@ -9,7 +9,7 @@ export class TimerService {
   private getLogsTimer?: nat64;
   private processPendingLogsTimer?: nat64;
 
-  constructor(private logManager: LogManager) {}
+  constructor(private logService: LogService) {}
 
   public init() {
     this.getLogsTimer = this.initGetLogsTimer();
@@ -31,7 +31,7 @@ export class TimerService {
 
       timerGuard.status = "Running";
 
-      await this.logManager.getLogs();
+      await this.logService.getLogs();
 
       timerGuard.status = "Ready";
     });
@@ -51,7 +51,7 @@ export class TimerService {
 
       timerGuard.status = "Running";
 
-      await this.logManager.processLogs();
+      await this.logService.processLogs();
 
       timerGuard.status = "Ready";
     });

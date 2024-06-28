@@ -3,10 +3,10 @@ import { AbiCoder, getUint, keccak256, toUtf8Bytes } from "ethers";
 
 import { EvmRpc } from "@bundly/ic-evm-rpc";
 
-import { ConfigService } from "../config/config.service";
 import { EtherFeeCalculator } from "../ether/ether-fee-calculator";
 import { EtherRpcService } from "../ether/ether-rpc.service";
 import { EtherService, SignRequest } from "../ether/ether.service";
+import { ConfigService } from "./config.service";
 
 export type GetLogsOptions = {
   fromBlock: bigint;

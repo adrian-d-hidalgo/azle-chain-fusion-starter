@@ -3,10 +3,10 @@ import { getUint } from "ethers";
 
 import { LogEntry } from "@bundly/ic-evm-rpc";
 
-import { CoprocessorService } from "../coprocessor/coprocessor.service";
 import { EtherRpcService } from "../ether/ether-rpc.service";
-import { Event, EventService } from "../event/event.service";
-import { fibonacci } from "../helpers";
+import { CoprocessorService } from "./coprocessor.service";
+import { EventService } from "./event.service";
+import { JobService } from "./job.service";
 
 const LogToProcess = Record({
   log: LogEntry,
@@ -17,7 +17,9 @@ type LogToProcess = typeof LogToProcess.tsType;
 
 const logsToProcess = StableBTreeMap<nat, LogToProcess>(10);
 
-export class LogManager {
+export class LogService {
+  private jobService: JobService = new JobService();
+
   constructor(private eventService: EventService) {}
 
   public async getLogs() {
@@ -77,15 +79,6 @@ export class LogManager {
     });
   }
 
-  private async processJobEvent(event: Event, jobId: bigint): Promise<string> {
-    // this calculation would likely exceed an ethereum blocks gas limit
-    // but can easily be calculated on the IC
-    const result = fibonacci(20);
-    const service = new EtherRpcService(event.service);
-    const coprocessor = new CoprocessorService(service, event.addresses);
-    return coprocessor.callback(result.toString(), jobId);
-  }
-
   public async processLogs() {
     const pendingLogs = logsToProcess.items().filter(([_, value]) => value.status.Pending !== undefined);
 
@@ -102,7 +95,7 @@ export class LogManager {
       console.log("Processing log", key, "jobId", jobId);
 
       try {
-        const result = await this.processJobEvent(event, jobId);
+        const result = await this.jobService.process(event, jobId);
         console.log("Job processed", jobId, "result", result);
         logsToProcess.insert(key, { ...value, status: { Processed: null } });
       } catch (error) {

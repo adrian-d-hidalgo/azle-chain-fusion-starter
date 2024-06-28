@@ -1,9 +1,9 @@
 import { None, Some } from "azle";
 import express, { Request } from "express";
 
-import { EventService } from "./event/event.service";
-import { LogManager } from "./log/log-manager";
-import { TimerService } from "./timers/timer.service";
+import { EventService } from "./services/event.service";
+import { LogService } from "./services/log-service";
+import { TimerService } from "./services/timer.service";
 
 type RpcApi = {
   url: string;
@@ -28,8 +28,8 @@ export const CreateServer = () => {
   app.use(express.json());
 
   const eventService = new EventService();
-  const logManager = new LogManager(eventService);
-  const timerService = new TimerService(logManager);
+  const logService = new LogService(eventService);
+  const timerService = new TimerService(logService);
 
   app.use((_, __, next) => {
     timerService.init();

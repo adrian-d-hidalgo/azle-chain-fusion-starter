@@ -1,8 +1,8 @@
 import { Record, Server, ic, init, query, setNodeServer, text } from "azle";
 import { KeyId } from "azle/canisters/management";
 
-import { ConfigService, EcdsaKeyId } from "./config/config.service";
 import { CreateServer } from "./server";
+import { ConfigService, EcdsaKeyId } from "./services/config.service";
 
 const InitOptions = Record({
   ecdsa_key_id: KeyId,

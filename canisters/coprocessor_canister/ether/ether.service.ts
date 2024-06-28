@@ -3,7 +3,7 @@ import { Transaction, ethers } from "ethers";
 
 import { EvmRpc } from "@bundly/ic-evm-rpc";
 
-import { ConfigService } from "../config/config.service";
+import { ConfigService } from "../services/config.service";
 import { EtherRpcService } from "./ether-rpc.service";
 
 export type SignRequest = {
