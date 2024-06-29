@@ -92,11 +92,9 @@ export class LogService {
       // Topic 1 is the jobId
       const jobId = getUint(value.log.topics[1]);
 
-      console.log("Processing log", key, "jobId", jobId);
-
       try {
         const result = await this.jobService.process(event, jobId);
-        console.log("Job processed", jobId, "result", result);
+        console.log("Job processed", jobId, "with transaction", result);
         logsToProcess.insert(key, { ...value, status: { Processed: null } });
       } catch (error) {
         console.error("Error processing log", error);
