@@ -4,7 +4,13 @@
 
 ## Table of content
 
+-   [Overview](#overview)
+    -   [What is a Coprocessor?](#what-is-a-coprocessor)
+    -   [Why Use ICP as a Coprocessor for Ethereum?](#why-use-icp-as-a-coprocessor-for-ethereum)
 - [Getting started](#getting-started)
+    -   [In the Cloud](#in-the-cloud)
+    -   [Locally](#locally)
+    -   [Manual Setup](#manual-setup)
 - [Architecture](#architecture)
 - [Development](#development)
 
@@ -52,7 +58,13 @@ If you want to create more jobs, simply run `npm run job:create`.
 
 TODO
 
-### Locally manual setup
+### Locally
+
+Ensure Docker and VS Code are installed and running, then click the button below:
+
+TODO
+
+### Manual setup
 
 Ensure the following are installed on your system:
 
@@ -61,6 +73,13 @@ Ensure the following are installed on your system:
 - [Caddy](https://caddyserver.com/docs/install#install)
 - [DFX](https://internetcomputer.org/docs/current/developer-docs/build/install-upgrade-remove) `>= 0.18`
 - [Azle dependencies](https://demergent-labs.github.io/azle/get_started.html)
+
+Run these commands in a new, empty project directory:
+
+```sh
+git clone https://github.com/adrian-d-hidalgo/azle-chain-fusion-starter.git
+cd azle-chain-fusion-starter
+```
 
 ## Architecture
 
