@@ -94,7 +94,7 @@ export class LogService {
 
       try {
         const result = await this.jobService.process(event, jobId);
-        console.log("Job processed", jobId, "with transaction", result);
+        console.log("Successfully ran job", jobId, "with transaction", result);
         logsToProcess.insert(key, { ...value, status: { Processed: null } });
       } catch (error) {
         console.error("Error processing log", error);
