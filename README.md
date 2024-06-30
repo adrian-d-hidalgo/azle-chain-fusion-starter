@@ -50,8 +50,8 @@ POST /events
 }
 ```
 
-If you want to check that the `coprocessor_canister` really processed the events, you can either look at the logs output by running `npm run start` – keep an eye open for the `Successfully ran job` message – or you can call the EVM contract to get the results of the jobs.
-To do this, run `npm run job:result <job_id>` where `<job_id>` is the id of the job you want to get the result for. This should always return `"6765"` for processed jobs, which is the 20th fibonacci number, and `""` for unprocessed jobs.
+If you want to check that the `chain_fusion` really processed the events, you can either look at the logs output by running `npm run start` – keep an eye open for the `Successfully ran job` message – or you can call the EVM contract to get the results of the jobs.
+To do this, run `npm run job:result --job-id=<job_id>` where `<job_id>` is the id of the job you want to get the result for. This should always return `"6765"` for processed jobs, which is the 20th fibonacci number, and `""` for unprocessed jobs.
 
 If you want to create more jobs, simply run `npm run job:create`.
 
@@ -135,9 +135,9 @@ For local deployment, see the `scripts/deploy.sh` script and `scripts/Coprocesso
 
 ### Chain Fusion Canister
 
-The `coprocessor_canister` canister listens to `NewJob` events by periodically calling the `eth_getLogs` RPC method via the [EVM RPC canister](https://github.com/internet-computer-protocol/evm-rpc-canister). Upon receiving an event, it processes the job and sends the results back to the EVM smart contract via the EVM RPC canister, signing the transaction with threshold ECDSA.
+The `chain_fusion` canister listens to `NewJob` events by periodically calling the `eth_getLogs` RPC method via the [EVM RPC canister](https://github.com/internet-computer-protocol/evm-rpc-canister). Upon receiving an event, it processes the job and sends the results back to the EVM smart contract via the EVM RPC canister, signing the transaction with threshold ECDSA.
 
-The Job processing logic is in `canisters/coprocessor_canister/services/job.service.ts`:
+The Job processing logic is in `canisters/chain_fusion/services/job.service.ts`:
 
 ```typescript
 private async process(event: Event, jobId: bigint): Promise<string> {
@@ -152,11 +152,11 @@ private async process(event: Event, jobId: bigint): Promise<string> {
 
 ## Development
 
-All coprocessing logic resides in `canisters/coprocessor_canister/services/job.service.ts`. Developers can focus on writing jobs to process EVM smart contract events without altering the code for fetching events or sending transactions.
+All coprocessing logic resides in `canisters/chain_fusion/services/job.service.ts`. Developers can focus on writing jobs to process EVM smart contract events without altering the code for fetching events or sending transactions.
 
 ### Interacting with the EVM Smart Contract
 
-If you want to check that the `coprosessor_canister` canister really processed the events, you can either look at the logs output by running `./scripts/deploy.sh` – keep an eye open for the `Successfully ran job` message – or you can call the EVM contract to get the results of the jobs. To do this, run:
+If you want to check that the `chain_fusion` canister really processed the events, you can either look at the logs output by running `./scripts/deploy.sh` – keep an eye open for the `Successfully ran job` message – or you can call the EVM contract to get the results of the jobs. To do this, run:
 
 ```sh
 npm run job:result --job-id=<job_id>

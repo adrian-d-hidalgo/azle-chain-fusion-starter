@@ -2,7 +2,7 @@ import { None, Some } from "azle";
 import express, { Request } from "express";
 
 import { EventService } from "./services/event.service";
-import { LogService } from "./services/log-service";
+import { LogService } from "./services/log.service";
 import { TimerService } from "./services/timer.service";
 
 type RpcApi = {

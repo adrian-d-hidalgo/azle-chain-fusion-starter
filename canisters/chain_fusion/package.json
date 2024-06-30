@@ -1,5 +1,5 @@
 {
-  "name": "coprocessor_canister",
+  "name": "chain_fusion",
   "scripts": {
     "clean": "rm -rf .turbo && rm -rf node_modules"
   },

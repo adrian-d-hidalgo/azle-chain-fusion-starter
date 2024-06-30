@@ -33,7 +33,7 @@
     "job:result": "cast call 0x5fbdb2315678afecb367f032d93f642f64180aa3  \"getResult(uint)(string)\" $npm_config_job_id",
     "clean:icp": "npx azle clean && rm -rf .dfx",
     "clean:foundry": "rm -rf cache && rm -rf broadcast && rm -rf out",
-    "preclean": "dfx stop",
+    "preclean": "npm run stop",
     "clean": "turbo run clean && npm run clean:icp && npm run clean:foundry && rm -rf .turbo && rm -rf node_modules"
   },
   "devDependencies": {

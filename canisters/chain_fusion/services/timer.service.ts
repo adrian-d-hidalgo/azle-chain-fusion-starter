@@ -1,6 +1,6 @@
 import { ic, nat64 } from "azle";
 
-import { LogService } from "./log-service";
+import { LogService } from "./log.service";
 
 type TimerGuardStatus = "Ready" | "Running";
 type TimerGuard = { status: TimerGuardStatus };
