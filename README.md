@@ -34,7 +34,7 @@ POST /events
 
 ```json
 {
-  "connection": {
+  "service": {
     "type": "custom",
     "chainId": 31337,
     "services": [
