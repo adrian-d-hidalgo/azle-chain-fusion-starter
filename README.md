@@ -16,7 +16,7 @@
 
 ## Get started
 
-No matter what setup you pick from below, run `npm run start` from the project root to deploy the project. To understand the steps involved in deploying the project locally, examine the comments in `scripts/start.sh`. This script will
+Youc can choose any option you lige from below and run `npm run start` from the project root to deploy the project. To help understand the steps involved in deploying this project locally, please take a look at the comments in `scripts/start.sh`. This script will
 
 - start anvil
 - start dfx
@@ -49,7 +49,7 @@ POST /connections/custom
 }
 ```
 
-If you want to check that the `coprocessor_canister` really processed the events, you can either look at the logs output by running `npm run start` – keep an eye open for the `Successfully ran job` message – or you can call the EVM contract to get the results of the jobs.
+If you want to make sure that the `coprocessor_canister` is actually processing the events, you can either look at the logs output by running `npm run start` – keep an eye open for the `Successfully ran job` message – or you can call the EVM contract to get the results of the jobs.
 To do this, run `npm run job:result <job_id>` where `<job_id>` is the id of the job you want to get the result for. This should always return `"6765"` for processed jobs, which is the 20th fibonacci number, and `""` for unprocessed jobs.
 
 If you want to create more jobs, simply run `npm run job:create`.
