@@ -2,19 +2,19 @@
   "version": 1,
   "dfx": "0.20.1",
   "canisters": {
-    "coprocessor_canister": {
+    "chain_fusion": {
       "type": "custom",
-      "main": "canisters/coprocessor_canister/index.ts",
-      "candid": "canisters/coprocessor_canister/index.did",
+      "main": "canisters/chain_fusion/index.ts",
+      "candid": "canisters/chain_fusion/index.did",
       "candid_gen": "automatic",
-      "build": "npx azle@0.21.1 coprocessor_canister",
-      "wasm": ".azle/coprocessor_canister/coprocessor_canister.wasm",
+      "build": "npx azle@0.21.1 chain_fusion",
+      "wasm": ".azle/chain_fusion/chain_fusion.wasm",
       "gzip": true,
       "dependencies": ["evm_rpc"],
       "metadata": [
         {
           "name": "candid:service",
-          "path": "canisters/coprocessor_canister/index.did"
+          "path": "canisters/chain_fusion/index.did"
         },
         {
           "name": "cdk:name",
