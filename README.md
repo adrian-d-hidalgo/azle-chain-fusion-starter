@@ -4,13 +4,13 @@
 
 ## Table of content
 
--   [Overview](#overview)
-    -   [What is a Coprocessor?](#what-is-a-coprocessor)
-    -   [Why Use ICP as a Coprocessor for Ethereum?](#why-use-icp-as-a-coprocessor-for-ethereum)
+- [Overview](#overview)
+  - [What is a Coprocessor?](#what-is-a-coprocessor)
+  - [Why Use ICP as a Coprocessor for Ethereum?](#why-use-icp-as-a-coprocessor-for-ethereum)
 - [Getting started](#getting-started)
-    -   [In the Cloud](#in-the-cloud)
-    -   [Locally](#locally)
-    -   [Manual Setup](#manual-setup)
+  - [In the Cloud](#in-the-cloud)
+  - [Locally](#locally)
+  - [Manual Setup](#manual-setup)
 - [Architecture](#architecture)
 - [Development](#development)
 
@@ -28,13 +28,14 @@ No matter what setup you pick from below, run `npm run start` from the project r
 
 **Endpoint**
 
-POST /connections/custom
+POST /events
 
 **Body**
 
 ```json
 {
   "connection": {
+    "type": "custom",
     "chainId": 31337,
     "services": [
       {
