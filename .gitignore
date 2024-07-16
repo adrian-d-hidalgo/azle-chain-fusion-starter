@@ -10,6 +10,7 @@
 
 # dfx temporary files
 .dfx/
+deps
 
 # Generated files
 **/declarations/

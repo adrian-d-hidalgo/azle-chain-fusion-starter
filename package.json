@@ -1,6 +1,6 @@
 {
   "name": "azle-chain-fusion-starter",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "license": "MIT",
   "author": "Bundly",
   "engines": {
@@ -31,7 +31,7 @@
     "stop": "sh ./scripts/stop.sh",
     "job:create": "cast send 0x5fbdb2315678afecb367f032d93f642f64180aa3  \"newJob()\" --private-key=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --value 0.01ether",
     "job:result": "cast call 0x5fbdb2315678afecb367f032d93f642f64180aa3  \"getResult(uint)(string)\" $npm_config_job_id",
-    "clean:icp": "npx azle clean && rm -rf .dfx",
+    "clean:icp": "npx azle clean && rm -rf .dfx && rm -rf deps",
     "clean:foundry": "rm -rf cache && rm -rf broadcast && rm -rf out",
     "preclean": "npm run stop",
     "clean": "turbo run clean && npm run clean:icp && npm run clean:foundry && rm -rf .turbo && rm -rf node_modules"

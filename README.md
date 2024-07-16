@@ -80,6 +80,7 @@ Run these commands in a new, empty project directory:
 ```sh
 git clone https://github.com/adrian-d-hidalgo/azle-chain-fusion-starter.git
 cd azle-chain-fusion-starter
+npm install
 ```
 
 ## Architecture
