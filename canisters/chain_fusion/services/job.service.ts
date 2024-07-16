@@ -14,7 +14,7 @@ export class JobService {
     // this calculation would likely exceed an ethereum blocks gas limit
     // but can easily be calculated on the IC
     const result = this.fibonacci(20);
-    const service = new EtherRpcService(event.service);
+    const service = new EtherRpcService(event.services);
     const coprocessor = new CoprocessorService(service, event.addresses);
     return coprocessor.callback(result.toString(), jobId);
   }

@@ -1,7 +1,6 @@
-import { None, Some } from "azle";
 import express, { Request } from "express";
 
-import { EventService } from "./services/event.service";
+import { AddNewEventData, EventService } from "./services/event.service";
 import { LogService } from "./services/log.service";
 import { TimerService } from "./services/timer.service";
 
@@ -11,13 +10,13 @@ type RpcApi = {
 };
 
 type RegisterCustomRpcIntegration = {
-  service: {
-    type: string;
+  services: {
+    name: "custom";
     chainId: number;
     services: RpcApi[];
   };
   events: {
-    topics: string[][];
+    topics?: string[][];
     addresses: string[];
   };
 };
@@ -41,29 +40,12 @@ export const CreateServer = () => {
   });
 
   app.post("/events", async (req: Request<any, any, RegisterCustomRpcIntegration>, res) => {
-    const { service, events } = req.body;
+    const { services, events } = req.body;
 
-    if (service.type !== "custom") {
-      res.status(400).send("Invalid service type");
-      return;
-    }
-
-    const chainId = BigInt(service.chainId);
-    const services = service.services.map((s) => {
-      const headers = s.headers
-        ? s.headers.map((header) => {
-            return { name: header.name, value: header.value };
-          })
-        : undefined;
-
-      return { url: s.url, headers: headers ? Some(headers) : None };
-    });
-
-    const data = {
-      service: { Custom: { chainId, services } },
+    const data: AddNewEventData = {
+      services,
       addresses: events.addresses,
-      topics: events.topics ? Some(events.topics) : None,
-      lastScrapedBlock: 0n,
+      topics: events.topics,
     };
 
     await eventService.add(data);

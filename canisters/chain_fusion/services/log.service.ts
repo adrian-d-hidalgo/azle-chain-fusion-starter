@@ -26,7 +26,7 @@ export class LogService {
     const events = this.eventService.getAll();
 
     for (let [eventId, event] of events) {
-      const service = new EtherRpcService(event.service);
+      const service = new EtherRpcService(event.services);
 
       const coprocessor = new CoprocessorService(service, event.addresses);
 
@@ -39,6 +39,7 @@ export class LogService {
 
       const getLogsResponse = await coprocessor.getLogs(getLogsArgs);
 
+      // TODO: Handle error
       if (getLogsResponse.Consistent?.Ok) {
         const logs = getLogsResponse.Consistent.Ok;
 
