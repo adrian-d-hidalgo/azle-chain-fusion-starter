@@ -1,26 +1,21 @@
-import { Null, Record, StableBTreeMap, Variant, nat } from "azle";
+import { nat } from "azle";
 import { getUint } from "ethers";
 
 import { LogEntry } from "@bundly/ic-evm-rpc";
 
+import { LogStore } from "../database/database";
 import { EtherRpcService } from "../ether/ether-rpc.service";
 import { CoprocessorService } from "./coprocessor.service";
 import { EventService } from "./event.service";
 import { JobService } from "./job.service";
 
-const LogToProcess = Record({
-  log: LogEntry,
-  eventId: nat,
-  status: Variant({ Pending: Null, Processed: Null }),
-});
-type LogToProcess = typeof LogToProcess.tsType;
-
-const logsToProcess = StableBTreeMap<nat, LogToProcess>(10);
-
 export class LogService {
   private jobService: JobService = new JobService();
 
-  constructor(private eventService: EventService) {}
+  constructor(
+    private readonly logs: LogStore,
+    private eventService: EventService
+  ) {}
 
   public async getLogs() {
     const events = this.eventService.getAll();
@@ -75,13 +70,13 @@ export class LogService {
 
   private saveLogs(logs: LogEntry[], eventId: nat) {
     logs.forEach((log) => {
-      const nextId = logsToProcess.len() + 1n;
-      logsToProcess.insert(nextId, { log, eventId, status: { Pending: null } });
+      const nextId = this.logs.len() + 1n;
+      this.logs.insert(nextId, { log, eventId, status: { Pending: null } });
     });
   }
 
   public async processLogs() {
-    const pendingLogs = logsToProcess.items().filter(([_, value]) => value.status.Pending !== undefined);
+    const pendingLogs = this.logs.items().filter(([_, value]) => value.status.Pending !== undefined);
 
     for (const [key, value] of pendingLogs) {
       const event = this.eventService.get(value.eventId).Some;
@@ -96,7 +91,7 @@ export class LogService {
       try {
         const result = await this.jobService.process(event, jobId);
         console.log("Successfully ran job", jobId, "with transaction", result);
-        logsToProcess.insert(key, { ...value, status: { Processed: null } });
+        this.logs.insert(key, { ...value, status: { Processed: null } });
       } catch (error) {
         console.error("Error processing log", error);
         throw new Error("Error processing log");

@@ -1,5 +1,6 @@
 import express, { Request } from "express";
 
+import { EventStore, LogStore } from "./database/database";
 import { AddNewEventData, EventService } from "./services/event.service";
 import { LogService } from "./services/log.service";
 import { TimerService } from "./services/timer.service";
@@ -26,8 +27,8 @@ export const CreateServer = () => {
 
   app.use(express.json());
 
-  const eventService = new EventService();
-  const logService = new LogService(eventService);
+  const eventService = new EventService(EventStore);
+  const logService = new LogService(LogStore, eventService);
   const timerService = new TimerService(logService);
 
   app.use((_, __, next) => {

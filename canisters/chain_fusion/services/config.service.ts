@@ -1,16 +1,7 @@
-import {
-  None,
-  Opt,
-  Record,
-  Some,
-  StableBTreeMap,
-  ThresholdKeyInfo,
-  ecdsaPublicKey,
-  nat,
-  nat8,
-  text,
-} from "azle";
+import { None, Some, ThresholdKeyInfo, ecdsaPublicKey, nat } from "azle";
 import { computeAddress, hexlify } from "ethers";
+
+import { AppConfig, AppConfigStore } from "../database/database";
 
 export type EcdsaKeyIdName = "dfx_test_key" | "test_key_1" | "key_1";
 export type EcdsaKeyIdCurve = "secp256k1";
@@ -20,27 +11,14 @@ export type EcdsaKeyId = {
   name: EcdsaKeyIdName;
 };
 
-const AppConfig = Record({
-  ecdsaKeyId: Opt(
-    Record({
-      name: text,
-      curve: text,
-    })
-  ),
-  evmAddress: Opt(text),
-  nonce: nat,
-});
-type AppConfig = typeof AppConfig.tsType;
-
 export type InitOptions = {
   ecdsaKeyId: EcdsaKeyId;
 };
 
 export class ConfigService {
-  private configStore = StableBTreeMap<nat8, typeof AppConfig.tsType>(0);
   private config: AppConfig;
 
-  constructor() {
+  constructor(private readonly configStore: AppConfigStore) {
     let appConfig = this.configStore.get(0).Some;
 
     if (appConfig === undefined) {

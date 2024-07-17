@@ -1,16 +1,7 @@
-import { None, Opt, Record, Some, StableBTreeMap, Vec, nat64, text } from "azle";
+import { None, Some, nat64 } from "azle";
 
-import { RpcServices } from "@bundly/ic-evm-rpc";
-
+import { Event, EventStore } from "../database/database";
 import { CreateServicesData, ServicesFactory } from "../models/services-factory";
-
-export const Event = Record({
-  services: RpcServices,
-  topics: Opt(Vec(Vec(text))),
-  addresses: Vec(text),
-  lastScrapedBlock: nat64,
-});
-export type Event = typeof Event.tsType;
 
 export type AddNewEventData = {
   services: CreateServicesData;
@@ -18,14 +9,14 @@ export type AddNewEventData = {
   addresses: string[];
 };
 
-const events = StableBTreeMap<nat64, Event>(20);
-
 export class EventService {
+  constructor(private readonly events: EventStore) {}
+
   public async add(data: AddNewEventData) {
     try {
-      const nextId = events.len() + 1n;
+      const nextId = this.events.len() + 1n;
 
-      const services = ServicesFactory.create(data.services);
+      const services = ServicesFactory.fromJson(data.services);
 
       const newEvent = {
         services,
@@ -34,7 +25,7 @@ export class EventService {
         lastScrapedBlock: 0n,
       };
 
-      events.insert(nextId, newEvent);
+      this.events.insert(nextId, newEvent);
 
       return { id: nextId };
     } catch (error) {
@@ -43,14 +34,14 @@ export class EventService {
   }
 
   public getAll() {
-    return events.items();
+    return this.events.items();
   }
 
   public get(id: nat64) {
-    return events.get(id);
+    return this.events.get(id);
   }
 
   public update(id: nat64, contract: Event) {
-    return events.insert(id, contract);
+    return this.events.insert(id, contract);
   }
 }
