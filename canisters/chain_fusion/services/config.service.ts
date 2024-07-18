@@ -1,4 +1,4 @@
-import { None, Some, ThresholdKeyInfo, ecdsaPublicKey, nat } from "azle";
+import { None, Some, ThresholdKeyInfo, ecdsaPublicKey, nat } from "azle/experimental";
 import { computeAddress, hexlify } from "ethers";
 
 import { AppConfig, AppConfigStore } from "../database/database";
@@ -19,9 +19,9 @@ export class ConfigService {
   private config: AppConfig;
 
   constructor(private readonly configStore: AppConfigStore) {
-    let appConfig = this.configStore.get(0).Some;
+    let appConfig = this.configStore.get(0);
 
-    if (appConfig === undefined) {
+    if (appConfig === null) {
       const newConfig = {
         ecdsaKeyId: None,
         evmAddress: None,

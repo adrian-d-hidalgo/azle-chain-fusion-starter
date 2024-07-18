@@ -1,5 +1,5 @@
-import { Record, Server, ic, init, query, setNodeServer, text } from "azle";
-import { KeyId } from "azle/canisters/management";
+import { Record, Server, ic, init, query, setNodeServer, text } from "azle/experimental";
+import { KeyId } from "azle/experimental/canisters/management";
 
 import { AppConfigStore } from "./database/database";
 import { CreateServer } from "./server";

@@ -1,4 +1,4 @@
-import { None, Some, ic } from "azle";
+import { None, Some, ic } from "azle/experimental";
 import { AbiCoder, getUint, keccak256, toUtf8Bytes } from "ethers";
 
 import { EvmRpc } from "@bundly/ic-evm-rpc";

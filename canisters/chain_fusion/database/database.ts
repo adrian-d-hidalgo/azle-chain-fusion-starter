@@ -1,4 +1,4 @@
-import { Null, Opt, Record, StableBTreeMap, Variant, Vec, nat, nat8, nat64, text } from "azle";
+import { Null, Opt, Record, StableBTreeMap, Variant, Vec, nat, nat8, nat64, text } from "azle/experimental";
 
 import { LogEntry, RpcServices } from "@bundly/ic-evm-rpc";
 
@@ -20,7 +20,7 @@ export type AppConfigStore = typeof AppConfigStore;
 
 // Events
 export const Event = Record({
-  services: RpcServices,
+  service: RpcServices,
   topics: Opt(Vec(Vec(text))),
   addresses: Vec(text),
   lastScrapedBlock: nat64,

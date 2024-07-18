@@ -1,4 +1,4 @@
-import { ic, nat64 } from "azle";
+import { ic, nat64 } from "azle/experimental";
 
 import { LogService } from "./log.service";
 

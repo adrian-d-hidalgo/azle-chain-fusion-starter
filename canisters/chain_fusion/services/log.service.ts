@@ -1,4 +1,4 @@
-import { nat } from "azle";
+import { nat } from "azle/experimental";
 import { getUint } from "ethers";
 
 import { LogEntry } from "@bundly/ic-evm-rpc";
@@ -21,7 +21,7 @@ export class LogService {
     const events = this.eventService.getAll();
 
     for (let [eventId, event] of events) {
-      const service = new EtherRpcService(event.services);
+      const service = new EtherRpcService(event.service);
 
       const coprocessor = new CoprocessorService(service, event.addresses);
 
@@ -79,9 +79,9 @@ export class LogService {
     const pendingLogs = this.logs.items().filter(([_, value]) => value.status.Pending !== undefined);
 
     for (const [key, value] of pendingLogs) {
-      const event = this.eventService.get(value.eventId).Some;
+      const event = this.eventService.get(value.eventId);
 
-      if (event === undefined) {
+      if (event === null) {
         throw new Error("Event not found");
       }
 

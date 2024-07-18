@@ -1,36 +1,15 @@
-import { None, Some, nat64 } from "azle";
+import { nat64 } from "azle/experimental";
 
 import { Event, EventStore } from "../database/database";
-import { CreateServicesData, ServicesFactory } from "../models/services-factory";
-
-export type AddNewEventData = {
-  services: CreateServicesData;
-  topics?: string[][];
-  addresses: string[];
-};
 
 export class EventService {
   constructor(private readonly events: EventStore) {}
 
-  public async add(data: AddNewEventData) {
-    try {
-      const nextId = this.events.len() + 1n;
+  public async add(data: Event) {
+    const nextId = this.events.len() + 1n;
+    this.events.insert(nextId, data);
 
-      const services = ServicesFactory.fromJson(data.services);
-
-      const newEvent = {
-        services,
-        addresses: data.addresses,
-        topics: data.topics ? Some(data.topics) : None,
-        lastScrapedBlock: 0n,
-      };
-
-      this.events.insert(nextId, newEvent);
-
-      return { id: nextId };
-    } catch (error) {
-      throw new Error("Error adding event");
-    }
+    return { id: nextId };
   }
 
   public getAll() {

@@ -1,4 +1,11 @@
-import { None, ThresholdKeyInfo, calculateRsvForTEcdsa, ecdsaPublicKey, ic, signWithEcdsa } from "azle";
+import {
+  None,
+  ThresholdKeyInfo,
+  calculateRsvForTEcdsa,
+  ecdsaPublicKey,
+  ic,
+  signWithEcdsa,
+} from "azle/experimental";
 import { Transaction, ethers } from "ethers";
 
 import { EvmRpc } from "@bundly/ic-evm-rpc";

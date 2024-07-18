@@ -1,4 +1,4 @@
-import { None, ic } from "azle";
+import { None, ic } from "azle/experimental";
 
 import { EvmRpc } from "@bundly/ic-evm-rpc";
 

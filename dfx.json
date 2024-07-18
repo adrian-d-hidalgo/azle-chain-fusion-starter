@@ -3,24 +3,10 @@
   "dfx": "0.20.1",
   "canisters": {
     "chain_fusion": {
-      "type": "custom",
+      "type": "azle",
       "main": "canisters/chain_fusion/index.ts",
-      "candid": "canisters/chain_fusion/index.did",
       "candid_gen": "automatic",
-      "build": "npx azle@0.21.1 chain_fusion",
-      "wasm": ".azle/chain_fusion/chain_fusion.wasm",
-      "gzip": true,
-      "dependencies": ["evm_rpc"],
-      "metadata": [
-        {
-          "name": "candid:service",
-          "path": "canisters/chain_fusion/index.did"
-        },
-        {
-          "name": "cdk:name",
-          "content": "azle"
-        }
-      ]
+      "dependencies": ["evm_rpc"]
     },
     "evm_rpc": {
       "type": "custom",

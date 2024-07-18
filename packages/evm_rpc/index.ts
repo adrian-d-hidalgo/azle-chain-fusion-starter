@@ -15,7 +15,7 @@ import {
   nat64,
   text,
   update,
-} from "azle";
+} from "azle/experimental";
 
 export const LogEntry = Record({
   transactionHash: Opt(text),
@@ -84,27 +84,30 @@ export const HttpHeader = Record({ value: text, name: text });
 export const RpcApi = Record({ url: text, headers: Opt(Vec(HttpHeader)) });
 export type RpcApi = typeof RpcApi.tsType;
 
-const EthSepoliaService = Variant({
+export const EthSepoliaService = Variant({
   Alchemy: Null,
   Ankr: Null,
   BlockPi: Null,
   PublicNode: Null,
 });
+export type EthSepoliaService = typeof EthSepoliaService.tsType;
 
-const EthMainnetService = Variant({
+export const EthMainnetService = Variant({
   Alchemy: Null,
   Ankr: Null,
   BlockPi: Null,
   Cloudflare: Null,
   PublicNode: Null,
 });
+export type EthMainnetService = typeof EthMainnetService.tsType;
 
-const L2MainnetService = Variant({
+export const L2MainnetService = Variant({
   Alchemy: Null,
   Ankr: Null,
   BlockPi: Null,
   PublicNode: Null,
 });
+export type L2MainnetService = typeof L2MainnetService.tsType;
 
 export const RpcService = Variant({
   Chain: nat64,
