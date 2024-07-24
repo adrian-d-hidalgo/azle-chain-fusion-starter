@@ -2,11 +2,11 @@
 
 ![hero3](https://github.com/letmejustputthishere/chain-fusion-starter/assets/32162112/e787cf9c-0bfc-4ce3-8211-8df61cf06a0b)
 
-## Table of content
+## Table of contents
 
 - [Overview](#overview)
   - [What is a Coprocessor?](#what-is-a-coprocessor)
-  - [Why Use ICP as a Coprocessor for Ethereum?](#why-use-icp-as-a-coprocessor-for-ethereum)
+  - [Why choose ICP as a Coprocessor for Ethereum?](#why-use-icp-as-a-coprocessor-for-ethereum)
 - [Architecture](#architecture)
 - [Setup](#setup)
   - [In the Cloud](#in-the-cloud)
@@ -95,7 +95,7 @@ TODO
 
 Ensure Docker and VS Code are installed and running, then click the button below:
 
-TODO
+TODO:
 
 ### Manual setup
 
@@ -220,6 +220,6 @@ npm run sepolia:job:create --contract-address=<contract_address>
 
 ## Development
 
-All coprocessing logic resides in `canisters/chain_fusion/services/job.service.ts`. Developers can focus on writing jobs to process EVM smart contract events without altering the code for fetching events or sending transactions.
+All coprocessing logic lives in `canisters/chain_fusion/services/job.service.ts`. Developers can focus on writing jobs to process EVM smart contract events without altering the code for fetching events or sending transactions.
 
 Note that the Chain Fusion Canister only scrapes logs every 3 minutes, so you may need to wait a few minutes before seeing the new job processed.
