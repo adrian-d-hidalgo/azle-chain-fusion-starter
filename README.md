@@ -7,81 +7,15 @@
 - [Overview](#overview)
   - [What is a Coprocessor?](#what-is-a-coprocessor)
   - [Why Use ICP as a Coprocessor for Ethereum?](#why-use-icp-as-a-coprocessor-for-ethereum)
-- [Getting started](#getting-started)
+- [Architecture](#architecture)
+- [Setup](#setup)
   - [In the Cloud](#in-the-cloud)
   - [Locally](#locally)
   - [Manual Setup](#manual-setup)
-- [Architecture](#architecture)
+- [Getting started](#getting-started)
+  - [Working with Foundry](#working-with-foundry)
+  - [Working with Sepolia](#working-with-sepolia)
 - [Development](#development)
-
-## Get started
-
-No matter what setup you pick from below, run `npm run start` from the project root to deploy the project. To understand the steps involved in deploying the project locally, examine the comments in `scripts/start.sh`. This script will
-
-- start anvil
-- start dfx
-- deploy the EVM contract
-- generate a number of jobs
-- deploy the chain_fusion
-
-### Set an Event listener
-
-**Endpoint**
-
-POST /events
-
-**Body**
-
-```json
-{
-  "services": {
-    "name": "custom",
-    "chainId": 31337,
-    "services": [
-      {
-        "url": "https://localhost:8546"
-      }
-    ]
-  },
-  "events": {
-    "topics": [["0x031ada964b8e520743eb9508d0ace62654b126430b7e5a92b42e78eebb61602e"]],
-    "addresses": ["0x5FbDB2315678afecb367f032d93F642f64180aa3"]
-  }
-}
-```
-
-If you want to check that the `chain_fusion` really processed the events, you can either look at the logs output by running `npm run start` – keep an eye open for the `Successfully ran job` message – or you can call the EVM contract to get the results of the jobs.
-To do this, run `npm run job:result --job-id=<job_id>` where `<job_id>` is the id of the job you want to get the result for. This should always return `"6765"` for processed jobs, which is the 20th fibonacci number, and `""` for unprocessed jobs.
-
-If you want to create more jobs, simply run `npm run job:create`.
-
-### In the cloud
-
-TODO
-
-### Locally
-
-Ensure Docker and VS Code are installed and running, then click the button below:
-
-TODO
-
-### Manual setup
-
-Ensure the following are installed on your system:
-
-- [Node.js](https://nodejs.org/en/) `>= 21`
-- [Foundry](https://github.com/foundry-rs/foundry)
-- [Caddy](https://caddyserver.com/docs/install#install)
-- [DFX](https://internetcomputer.org/docs/current/developer-docs/build/install-upgrade-remove) `>= 0.18`
-- [Azle dependencies](https://demergent-labs.github.io/azle/get_started.html)
-
-Run these commands in a new, empty project directory:
-
-```sh
-git clone https://github.com/adrian-d-hidalgo/azle-chain-fusion-starter.git
-cd azle-chain-fusion-starter
-npm install
-```
 
 ## Architecture
 
@@ -151,16 +85,81 @@ private async process(event: Event, jobId: bigint): Promise<string> {
 }
 ```
 
-## Development
+## Setup
 
-All coprocessing logic resides in `canisters/chain_fusion/services/job.service.ts`. Developers can focus on writing jobs to process EVM smart contract events without altering the code for fetching events or sending transactions.
+### In the cloud
 
-### Interacting with the EVM Smart Contract
+TODO
 
-If you want to check that the `chain_fusion` canister really processed the events, you can either look at the logs output by running `./scripts/deploy.sh` – keep an eye open for the `Successfully ran job` message – or you can call the EVM contract to get the results of the jobs. To do this, run:
+### Locally
+
+Ensure Docker and VS Code are installed and running, then click the button below:
+
+TODO
+
+### Manual setup
+
+Ensure the following are installed on your system:
+
+- [Node.js](https://nodejs.org/en/) `>= 20`
+- [Foundry](https://github.com/foundry-rs/foundry)
+- [Caddy](https://caddyserver.com/docs/install#install)
+- [DFX](https://internetcomputer.org/docs/current/developer-docs/build/install-upgrade-remove) `>= 0.18`
+- [Azle dependencies](https://demergent-labs.github.io/azle/get_started.html)
+
+Run these commands in a new, empty project directory:
 
 ```sh
-npm run job:result --job-id=<job_id>
+git clone https://github.com/adrian-d-hidalgo/azle-chain-fusion-starter.git
+cd azle-chain-fusion-starter
+npm install
+```
+
+## Getting started
+
+No matter what setup you pick from below, run `npm run ic:start` from the project root to deploy the project. To understand the steps involved in deploying the `chain_fusion` locally, examine the comments in `scripts/ic/start.sh`. This script will:
+
+- start icp local replica
+- deploy the evm_rpc
+- deploy the chain_fusion
+
+### Working with Foundry
+
+For a local development you can use Foundry, run `npm run foundry:start` from the project root to start the needed services. To understand the steps involved in starting foundry services, examine the comments in `scripts/foundry/start.sh`. This script will:
+
+- start anvil
+- start caddy
+
+Then to deploy the smartcontract run `npm run foundry:deploy`, examine the comments in `scripts/foundry/deploy.sh` to understand the steps involved. This script will:
+
+- deploy the EVM contract
+- generate a number of jobs
+
+Now you can register an event listener:
+
+```json
+// POST /events
+{
+  "network": {
+    "name": "custom",
+    "chainId": 31337,
+    "services": [
+      {
+        "url": "https://localhost:8546"
+      }
+    ]
+  },
+  "events": {
+    "topics": [["0x031ada964b8e520743eb9508d0ace62654b126430b7e5a92b42e78eebb61602e"]],
+    "addresses": ["0x5FbDB2315678afecb367f032d93F642f64180aa3"]
+  }
+}
+```
+
+If you want to check that the `chain_fusion` canister really processed the events, you can either look at the logs output by running `npm run ic:start` – keep an eye open for the `Successfully ran job` message – or you can call the EVM contract to get the results of the jobs. To do this, run:
+
+```sh
+npm run foundry:job:result --job-id=<job_id>
 ```
 
 where `<job_id>` is the ID of the job you want to get the result for. This should always return `"6765"` for processed jobs, which is the 20th Fibonacci number, and `""` for unprocessed jobs.
@@ -168,7 +167,55 @@ where `<job_id>` is the ID of the job you want to get the result for. This shoul
 If you want to create more jobs, simply run:
 
 ```sh
-npm run job:create
+npm run foundry:job:create
 ```
+
+### Working with Sepolia
+
+Clone the `.env-example` located in `networks/sepolia` and replace with your values:
+
+```bash
+cp networks/sepolia/.env-example networks/sepolia/.env
+```
+
+Then, you can deploy the contract:
+
+```bash
+npm run sepolia:deploy
+```
+
+Now, you can register an event listener:
+
+```json
+// POST /events
+{
+  "network": {
+    "type": "sepolia",
+    "services": ["Alchemy"]
+  },
+  "events": {
+    "topics": [["0x031ada964b8e520743eb9508d0ace62654b126430b7e5a92b42e78eebb61602e"]],
+    "addresses": ["YOUR_CONTRACT_ADDRESS"]
+  }
+}
+```
+
+If you want to check that the `chain_fusion` canister really processed the events, you can either look at the logs output by running `npm run ic:start` – keep an eye open for the `Successfully ran job` message – or you can call the EVM contract to get the results of the jobs. To do this, run:
+
+```sh
+// TODO
+```
+
+where `<job_id>` is the ID of the job you want to get the result for. This should always return `"6765"` for processed jobs, which is the 20th Fibonacci number, and `""` for unprocessed jobs.
+
+If you want to create more jobs, simply run:
+
+```sh
+// TODO
+```
+
+## Development
+
+All coprocessing logic resides in `canisters/chain_fusion/services/job.service.ts`. Developers can focus on writing jobs to process EVM smart contract events without altering the code for fetching events or sending transactions.
 
 Note that the Chain Fusion Canister only scrapes logs every 3 minutes, so you may need to wait a few minutes before seeing the new job processed.
