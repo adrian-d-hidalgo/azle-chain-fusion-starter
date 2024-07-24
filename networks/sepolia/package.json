@@ -7,7 +7,7 @@
   "author": "",
   "license": "ISC",
   "scripts": {
-    "clean": "rm -rf artifacts cache node_modules turbo"
+    "clean": "rm -rf .turbo artifacts cache contracts node_modules"
   },
   "dependencies": {
     "dotenv": "^16.4.5"
