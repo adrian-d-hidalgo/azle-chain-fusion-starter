@@ -14,7 +14,7 @@
   - [Manual Setup](#manual-setup)
 - [Getting started](#getting-started)
   - [Working with Foundry](#working-with-foundry)
-  - [Working with Sepolia](#working-with-sepolia)
+  - [Working with Sepolia](#working-with-sepolia) - Experimental, WIP
 - [Development](#development)
 
 ## Architecture
@@ -151,26 +151,30 @@ Now you can register an event listener:
   },
   "events": {
     "topics": [["0x031ada964b8e520743eb9508d0ace62654b126430b7e5a92b42e78eebb61602e"]],
-    "addresses": ["0x5FbDB2315678afecb367f032d93F642f64180aa3"]
+    "addresses": ["YOUR_CONTRACT_ADDRESS"]
   }
 }
 ```
 
+You can register one event lister per smart contract deployed.
+
 If you want to check that the `chain_fusion` canister really processed the events, you can either look at the logs output by running `npm run ic:start` – keep an eye open for the `Successfully ran job` message – or you can call the EVM contract to get the results of the jobs. To do this, run:
 
 ```sh
-npm run foundry:job:result --job-id=<job_id>
+npm run foundry:job:result --job-id=<job_id> --contract-address=<contract_address>
 ```
 
-where `<job_id>` is the ID of the job you want to get the result for. This should always return `"6765"` for processed jobs, which is the 20th Fibonacci number, and `""` for unprocessed jobs.
+where `<job_id>` is the ID of the job you want to get the result for and <contract_address> is the Address given when the contract was deployed. This should always return `"6765"` for processed jobs, which is the 20th Fibonacci number, and `""` for unprocessed jobs.
 
 If you want to create more jobs, simply run:
 
 ```sh
-npm run foundry:job:create
+npm run foundry:job:create --contract-address=<contract_address>
 ```
 
 ### Working with Sepolia
+
+NOTE: This is an experimental feature and it represents a Work in Progress, maybe cannot works as expected.
 
 Clone the `.env-example` located in `networks/sepolia` and replace with your values:
 
@@ -203,15 +207,15 @@ Now, you can register an event listener:
 If you want to check that the `chain_fusion` canister really processed the events, you can either look at the logs output by running `npm run ic:start` – keep an eye open for the `Successfully ran job` message – or you can call the EVM contract to get the results of the jobs. To do this, run:
 
 ```sh
-// TODO
+npm run sepolia:job:result --job-id=<job_id> --contract-address=<contract_address>
 ```
 
-where `<job_id>` is the ID of the job you want to get the result for. This should always return `"6765"` for processed jobs, which is the 20th Fibonacci number, and `""` for unprocessed jobs.
+where `<job_id>` is the ID of the job you want to get the result for and <contract_address> is the Address given when the contract was deployed. This should always return `"6765"` for processed jobs, which is the 20th Fibonacci number, and `""` for unprocessed jobs.
 
 If you want to create more jobs, simply run:
 
 ```sh
-// TODO
+npm run sepolia:job:create --contract-address=<contract_address>
 ```
 
 ## Development
