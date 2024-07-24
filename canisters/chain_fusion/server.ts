@@ -4,22 +4,13 @@ import express, { Request } from "express";
 import { RpcServices } from "@bundly/ic-evm-rpc";
 
 import { EventStore, LogStore } from "./database/database";
-import { fromJSON } from "./evm_rpc/parser";
+import { NetworkJSON, fromJSON } from "./evm_rpc/parser";
 import { EventService } from "./services/event.service";
 import { LogService } from "./services/log.service";
 import { TimerService } from "./services/timer.service";
 
-type RpcApi = {
-  url: string;
-  headers?: { value: string; name: string }[];
-};
-
 type RegisterCustomRpcIntegration = {
-  service: {
-    type: string;
-    chainId: number;
-    services: RpcApi[];
-  };
+  network: NetworkJSON;
   events: {
     topics: string[][];
     addresses: string[];
@@ -45,11 +36,11 @@ export const CreateServer = () => {
   });
 
   app.post("/events", async (req: Request<any, any, RegisterCustomRpcIntegration>, res) => {
-    const { service, events } = req.body;
+    const { network, events } = req.body;
 
     const data = {
       // TODO: Fix this types
-      service: fromJSON(service as any) as RpcServices,
+      service: fromJSON(network) as RpcServices,
       addresses: events.addresses,
       topics: events.topics ? Some(events.topics) : None,
       lastScrapedBlock: 0n,
