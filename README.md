@@ -89,7 +89,7 @@ private async process(event: Event, jobId: bigint): Promise<string> {
 
 ### In the cloud
 
-TODO
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/adrian-d-hidalgo/azle-chain-fusion-starter/?quickstart=1)
 
 ### Locally
 
