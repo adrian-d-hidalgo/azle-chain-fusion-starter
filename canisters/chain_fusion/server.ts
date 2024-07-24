@@ -1,7 +1,10 @@
 import { None, Some } from "azle/experimental";
 import express, { Request } from "express";
 
+import { RpcServices } from "@bundly/ic-evm-rpc";
+
 import { EventStore, LogStore } from "./database/database";
+import { fromJSON } from "./evm_rpc/parser";
 import { EventService } from "./services/event.service";
 import { LogService } from "./services/log.service";
 import { TimerService } from "./services/timer.service";
@@ -44,24 +47,9 @@ export const CreateServer = () => {
   app.post("/events", async (req: Request<any, any, RegisterCustomRpcIntegration>, res) => {
     const { service, events } = req.body;
 
-    if (service.type !== "custom") {
-      res.status(400).send("Invalid service type");
-      return;
-    }
-
-    const chainId = BigInt(service.chainId);
-    const services = service.services.map((s) => {
-      const headers = s.headers
-        ? s.headers.map((header) => {
-            return { name: header.name, value: header.value };
-          })
-        : undefined;
-
-      return { url: s.url, headers: headers ? Some(headers) : None };
-    });
-
     const data = {
-      service: { Custom: { chainId, services } },
+      // TODO: Fix this types
+      service: fromJSON(service as any) as RpcServices,
       addresses: events.addresses,
       topics: events.topics ? Some(events.topics) : None,
       lastScrapedBlock: 0n,
