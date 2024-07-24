@@ -1,14 +1,20 @@
-FROM ghcr.io/dfinity/icp-dev-env:7
+FROM centos:7
+
+ENV NVM_VERSION=v0.39.7
+ENV DFX_VERSION=0.20.1
 
 # Install a more recent version of DFX
-RUN dfxvm install 0.20.1
+RUN DFX_VERSION=$DFX_VERSION DFXVM_INIT_YES=true sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
 
 # Install NVM
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v$NVM_VERSION/install.sh | bash
+
+# Source NVM
+RUN source ~/.bashrc
 
 # Install Node.js specified in .nvmrc
 RUN nvm install && \
 		nvm use
 		
 # Install Azle DFX extension
-RUN npx azle install-dfx-extension
+RUN npx azle install-dfx-extension -y
