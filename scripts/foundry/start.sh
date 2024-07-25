@@ -3,18 +3,19 @@
 # Find process IDs listening on port 8545 (anvil)
 anvil=$(lsof -t -i:8545)
 
-# Check if any PIDs were found
+# Check if any Anvil PIDs were found
 if [ -z "$anvil" ]; then
-    echo "Anvil not running."
+    anvil --slots-in-an-epoch 1 &
 else
-    # Kill the processes
-    kill $anvil && echo "Terminated running Anvil process."
-    sleep 3
+    echo "Anvil already running."
 fi
 
-# start anvil with slots in an epoch send to 1 for faster finalised blocks
-anvil --slots-in-an-epoch 1 &
-# kill caddyserver
-caddy stop
-# start caddyserver
-caddy start
+# Find process IDs listening on port 8545 (caddy)
+caddy_server=$(lsof -t -i:2019)
+
+# Check if any Caddy PIDs were found
+if [ -z "$caddy_server" ]; then
+		caddy start
+else
+		echo "Caddy server already running."
+fi

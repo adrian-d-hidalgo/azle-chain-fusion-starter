@@ -37,9 +37,6 @@
     "foundry:job:create": "sh ./scripts/foundry/job.sh create --contract-address=$npm_config_contract_address",
     "foundry:job:result": "sh ./scripts/foundry/job.sh getResult --job-id=$npm_config_job_id --contract-address=$npm_config_contract_address",
     "foundry:clean": "rm -rf cache broadcast out",
-    "sepolia:deploy": "sh ./scripts/sepolia/deploy.sh",
-    "sepolia:job:create": "echo \"Work in Progress\"",
-    "sepolia:job:result": "echo \"Work in Progress\"",
     "stop": "npm run ic:stop && npm run foundry:stop",
     "preclean": "npm run stop",
     "clean": "turbo run clean && npm run ic:clean && npm run foundry:clean && rm -rf .turbo node_modules"

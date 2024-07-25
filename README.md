@@ -14,7 +14,6 @@
   - [Manual Setup](#manual-setup)
 - [Getting started](#getting-started)
   - [Working with Foundry](#working-with-foundry)
-  - [Working with Sepolia](#working-with-sepolia) - Experimental, WIP
 - [Development](#development)
 
 ## Architecture
@@ -89,7 +88,7 @@ private async process(event: Event, jobId: bigint): Promise<string> {
 
 ### In the cloud
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/adrian-d-hidalgo/azle-chain-fusion-starter/?quickstart=1)
+TODO:
 
 ### Locally
 
@@ -170,52 +169,6 @@ If you want to create more jobs, simply run:
 
 ```sh
 npm run foundry:job:create --contract-address=<contract_address>
-```
-
-### Working with Sepolia
-
-NOTE: This is an experimental feature and it represents a Work in Progress, maybe cannot works as expected.
-
-Clone the `.env-example` located in `networks/sepolia` and replace with your values:
-
-```bash
-cp networks/sepolia/.env-example networks/sepolia/.env
-```
-
-Then, you can deploy the contract:
-
-```bash
-npm run sepolia:deploy
-```
-
-Now, you can register an event listener:
-
-```json
-// POST /events
-{
-  "network": {
-    "type": "sepolia",
-    "services": ["Alchemy"]
-  },
-  "events": {
-    "topics": [["0x031ada964b8e520743eb9508d0ace62654b126430b7e5a92b42e78eebb61602e"]],
-    "addresses": ["YOUR_CONTRACT_ADDRESS"]
-  }
-}
-```
-
-If you want to check that the `chain_fusion` canister really processed the events, you can either look at the logs output by running `npm run ic:start` – keep an eye open for the `Successfully ran job` message – or you can call the EVM contract to get the results of the jobs. To do this, run:
-
-```sh
-npm run sepolia:job:result --job-id=<job_id> --contract-address=<contract_address>
-```
-
-where `<job_id>` is the ID of the job you want to get the result for and <contract_address> is the Address given when the contract was deployed. This should always return `"6765"` for processed jobs, which is the 20th Fibonacci number, and `""` for unprocessed jobs.
-
-If you want to create more jobs, simply run:
-
-```sh
-npm run sepolia:job:create --contract-address=<contract_address>
 ```
 
 ## Development
