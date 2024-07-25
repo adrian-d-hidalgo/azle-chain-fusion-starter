@@ -1,13 +1,14 @@
 FROM ghcr.io/dfinity/icp-dev-env:7
 
-ENV NVM_DIR=/root/.nvm
-
 # Install a more recent version of DFX
-RUN dfxmv install 0.20.1
+RUN dfxvm install 0.20.1
+
+# Source bashrc to make sure nvm is available
+# RUN . ~/.bashrc
 
 # Install Node.js specified in .nvmrc
-RUN . "${NVM_DIR}/nvm.sh" && nvm install
-RUN . "${NVM_DIR}/nvm.sh" && nvm use
+RUN nvm install
+RUN nvm use
 		
 # Install Azle DFX extension
 RUN npx azle install-dfx-extension -y
