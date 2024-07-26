@@ -1,6 +1,7 @@
-import { Record, Server, ic, init, query, setNodeServer, text } from "azle";
-import { KeyId } from "azle/canisters/management";
+import { Record, Server, ic, init, query, setNodeServer, text } from "azle/experimental";
+import { KeyId } from "azle/experimental/canisters/management";
 
+import { AppConfigStore } from "./database/database";
 import { CreateServer } from "./server";
 import { ConfigService, EcdsaKeyId } from "./services/config.service";
 
@@ -25,14 +26,14 @@ export default Server(CreateServer, {
     } as unknown as EcdsaKeyId;
 
     ic.setTimer(0n, async () => {
-      const configService = new ConfigService();
+      const configService = new ConfigService(AppConfigStore);
       await configService.init({ ecdsaKeyId });
     });
 
     setNodeServer(CreateServer());
   }),
   get_evm_address: query([], text, () => {
-    const configService = new ConfigService();
+    const configService = new ConfigService(AppConfigStore);
     const evmAddress = configService.getEvmAddres();
 
     return evmAddress;

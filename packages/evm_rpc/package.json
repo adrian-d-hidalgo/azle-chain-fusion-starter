@@ -4,7 +4,7 @@
     "clean": "rm -rf .turbo && rm -rf node_modules"
   },
   "dependencies": {
-    "azle": "^0.21.1"
+    "azle": "^0.23.0"
   },
   "devDependencies": {
     "typescript": "^5.4.5"

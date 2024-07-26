@@ -1,15 +1,16 @@
 {
   "name": "azle-chain-fusion-starter",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "license": "MIT",
   "author": "Bundly",
   "engines": {
-    "node": ">=21"
+    "node": ">=20"
   },
   "packageManager": "^npm@10.5.0",
   "workspaces": [
     "canisters/*",
-    "packages/*"
+    "packages/*",
+    "networks/*"
   ],
   "keywords": [
     "azle",
@@ -27,14 +28,18 @@
     "typescript"
   ],
   "scripts": {
-    "start": "sh ./scripts/start.sh",
-    "stop": "sh ./scripts/stop.sh",
-    "job:create": "cast send 0x5fbdb2315678afecb367f032d93f642f64180aa3  \"newJob()\" --private-key=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --value 0.01ether",
-    "job:result": "cast call 0x5fbdb2315678afecb367f032d93f642f64180aa3  \"getResult(uint)(string)\" $npm_config_job_id",
-    "clean:icp": "npx azle clean && rm -rf .dfx",
-    "clean:foundry": "rm -rf cache && rm -rf broadcast && rm -rf out",
+    "ic:start": "sh ./scripts/ic/start.sh",
+    "ic:stop": "sh ./scripts/ic/stop.sh",
+    "ic:clean": "npx azle clean && rm -rf .dfx deps",
+    "foundry:start": "sh ./scripts/foundry/start.sh",
+    "foundry:stop": "sh ./scripts/foundry/stop.sh",
+    "foundry:deploy": "sh ./scripts/foundry/deploy.sh",
+    "foundry:job:create": "sh ./scripts/foundry/job.sh create --contract-address=$npm_config_contract_address",
+    "foundry:job:result": "sh ./scripts/foundry/job.sh getResult --job-id=$npm_config_job_id --contract-address=$npm_config_contract_address",
+    "foundry:clean": "rm -rf cache broadcast out",
+    "stop": "npm run ic:stop && npm run foundry:stop",
     "preclean": "npm run stop",
-    "clean": "turbo run clean && npm run clean:icp && npm run clean:foundry && rm -rf .turbo && rm -rf node_modules"
+    "clean": "turbo run clean && npm run ic:clean && npm run foundry:clean && rm -rf .turbo node_modules"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",

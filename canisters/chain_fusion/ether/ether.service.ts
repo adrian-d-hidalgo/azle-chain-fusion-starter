@@ -1,8 +1,16 @@
-import { None, ThresholdKeyInfo, calculateRsvForTEcdsa, ecdsaPublicKey, ic, signWithEcdsa } from "azle";
+import {
+  None,
+  ThresholdKeyInfo,
+  calculateRsvForTEcdsa,
+  ecdsaPublicKey,
+  ic,
+  signWithEcdsa,
+} from "azle/experimental";
 import { Transaction, ethers } from "ethers";
 
 import { EvmRpc } from "@bundly/ic-evm-rpc";
 
+import { AppConfigStore } from "../database/database";
 import { ConfigService } from "../services/config.service";
 import { EtherRpcService } from "./ether-rpc.service";
 
@@ -52,7 +60,7 @@ export class EtherService {
     const unsignedSerializedTx = tx.unsignedSerialized;
     const unsignedSerializedTxHash = ethers.keccak256(unsignedSerializedTx);
 
-    const configService = new ConfigService();
+    const configService = new ConfigService(AppConfigStore);
 
     const thresholdKeyInfo: ThresholdKeyInfo = {
       derivationPath: [],

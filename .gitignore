@@ -1,5 +1,5 @@
 # Various IDEs and Editors
-.vscode/
+.vscode/*
 !.vscode/settings.json
 .idea/
 **/*~
@@ -10,6 +10,7 @@
 
 # dfx temporary files
 .dfx/
+deps
 
 # Generated files
 **/declarations/

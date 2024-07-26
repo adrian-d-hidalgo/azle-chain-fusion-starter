@@ -1,21 +1,16 @@
-import { None, Some } from "azle";
+import { None, Some } from "azle/experimental";
 import express, { Request } from "express";
 
+import { RpcServices } from "@bundly/ic-evm-rpc";
+
+import { EventStore, LogStore } from "./database/database";
+import { NetworkJSON, fromJSON } from "./evm_rpc/parser";
 import { EventService } from "./services/event.service";
 import { LogService } from "./services/log.service";
 import { TimerService } from "./services/timer.service";
 
-type RpcApi = {
-  url: string;
-  headers?: { value: string; name: string }[];
-};
-
 type RegisterCustomRpcIntegration = {
-  service: {
-    type: string;
-    chainId: number;
-    services: RpcApi[];
-  };
+  network: NetworkJSON;
   events: {
     topics: string[][];
     addresses: string[];
@@ -27,8 +22,8 @@ export const CreateServer = () => {
 
   app.use(express.json());
 
-  const eventService = new EventService();
-  const logService = new LogService(eventService);
+  const eventService = new EventService(EventStore);
+  const logService = new LogService(LogStore, eventService);
   const timerService = new TimerService(logService);
 
   app.use((_, __, next) => {
@@ -41,26 +36,11 @@ export const CreateServer = () => {
   });
 
   app.post("/events", async (req: Request<any, any, RegisterCustomRpcIntegration>, res) => {
-    const { service, events } = req.body;
-
-    if (service.type !== "custom") {
-      res.status(400).send("Invalid service type");
-      return;
-    }
-
-    const chainId = BigInt(service.chainId);
-    const services = service.services.map((s) => {
-      const headers = s.headers
-        ? s.headers.map((header) => {
-            return { name: header.name, value: header.value };
-          })
-        : undefined;
-
-      return { url: s.url, headers: headers ? Some(headers) : None };
-    });
+    const { network, events } = req.body;
 
     const data = {
-      service: { Custom: { chainId, services } },
+      // TODO: Fix this types
+      service: fromJSON(network) as RpcServices,
       addresses: events.addresses,
       topics: events.topics ? Some(events.topics) : None,
       lastScrapedBlock: 0n,

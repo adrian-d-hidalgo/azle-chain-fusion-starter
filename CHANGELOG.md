@@ -1,3 +1,24 @@
+## [0.2.0] - 2024-07-26
+
+### Added
+
+- Update Azle version
+- Add support for listen multiple events at the same time
+- Improve chain_fusion start
+- Add support for Sepolia, Mainnet, ArbitrumOne, BaseMainnet, Optimism
+
+### Fixed
+
+- 
+
+### Breaking changes
+
+- Rename `npm run start` as `npm run ic:start`
+- Rename `npm run stop` as `npm run ic:stop`
+- Start dfx and start foundry have separete scripts
+- foundry start and deploy have separete scripts
+- `service` field in `POST /events` has been renamed as `networks`
+
 ## [0.1.2] - 2024-06-30
 
 ### Added

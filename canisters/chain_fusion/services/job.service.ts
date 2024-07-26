@@ -1,6 +1,6 @@
+import { Event } from "../database/database";
 import { EtherRpcService } from "../ether/ether-rpc.service";
 import { CoprocessorService } from "./coprocessor.service";
-import { Event } from "./event.service";
 
 export class JobService {
   private fibonacci(n: number): number {
